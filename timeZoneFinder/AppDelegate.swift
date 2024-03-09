@@ -4,7 +4,6 @@
 //
 //  Created by ryo fujimura on 3/8/24.
 //
-
 import Cocoa
 
 @main
@@ -12,11 +11,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusBarItem: NSStatusItem?
     var menu: NSMenu?
+    var settingsWindowController: SettingsWindowController?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Set up the status bar item
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusBarItem?.button?.title = "Loading..."
 
         // Start the timer to update the time every second
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
@@ -27,8 +26,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu = NSMenu()
         statusBarItem?.menu = menu
 
-        // Add time zones to the menu
-        addTimeZones()
+        // Add the slider to the menu
+        let sliderItem = NSMenuItem()
+        let slider = NSSlider(value: 0, minValue: -12, maxValue: 12, target: self, action: #selector(sliderValueChanged(_:)))
+        sliderItem.view = slider
+        menu?.addItem(sliderItem)
+        menu?.addItem(NSMenuItem.separator())
+
+        // Add the "Add Time Zone" option to the menu
+        let addItem = NSMenuItem(title: "Add Time Zone", action: #selector(openSettings(_:)), keyEquivalent: "")
+        menu?.addItem(addItem)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -42,56 +49,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarItem?.button?.title = dateFormatter.string(from: Date())
     }
 
-    // Function to add time zone menu items to the menu
-    func addTimeZones() {
-        let sliderItem = NSMenuItem()
-        let slider = NSSlider(value: 0, minValue: -12, maxValue: 12, target: self, action: #selector(sliderValueChanged(_:)))
-        sliderItem.view = slider
-        menu?.addItem(sliderItem)
-        menu?.addItem(NSMenuItem.separator())
-
-        let timeZones = ["New York": "America/New_York", "London": "Europe/London", "Tokyo": "Asia/Tokyo"]
-        
-        for (name, identifier) in timeZones {
-            let menuItem = NSMenuItem(title: name, action: #selector(showTimeZone(_:)), keyEquivalent: "")
-            menuItem.representedObject = identifier
-            menu?.addItem(menuItem)
-        }
-    }
-
-    // Function to handle the selection of a time zone menu item
-    @objc func showTimeZone(_ sender: NSMenuItem) {
-        if let timeZoneIdentifier = sender.representedObject as? String {
-            let offset = (menu?.item(at: 0)?.view as? NSSlider)?.intValue ?? 0
-            let dateFormatter = DateFormatter()
-            dateFormatter.timeStyle = .medium
-            dateFormatter.timeZone = TimeZone(identifier: timeZoneIdentifier)
-            
-            let adjustedDate = Calendar.current.date(byAdding: .hour, value: Int(offset), to: Date())
-            let timeString = dateFormatter.string(from: adjustedDate ?? Date())
-            statusBarItem?.button?.title = "\(sender.title.components(separatedBy: ":").first ?? ""): \(timeString)"
-        }
-    }
-
     // Function to handle changes in the slider's value
     @objc func sliderValueChanged(_ sender: NSSlider) {
         let offset = sender.intValue
-        updateMenuItems(withOffset: Int(offset))
+        updateTimeZones(settingsWindowController?.selectedTimeZones ?? [], offset: Int(offset))
     }
 
-    // Function to update the menu items with the adjusted time
-    func updateMenuItems(withOffset offset: Int) {
+    // Function to open the settings window
+    @objc func openSettings(_ sender: NSMenuItem) {
+        if settingsWindowController == nil {
+            settingsWindowController = SettingsWindowController()
+        }
+        settingsWindowController?.showWindow()
+    }
+
+    // Function to update the menu with the selected time zones
+    func updateTimeZones(_ timeZones: [String], offset: Int = 0) {
+        // Remove all items except the slider and the "Add Time Zone" option
+        while menu?.items.count ?? 0 > 2 {
+            menu?.removeItem(at: 2)
+        }
+
         let dateFormatter = DateFormatter()
         dateFormatter.timeStyle = .medium
-        
-        for item in menu?.items ?? [] {
-            guard let identifier = item.representedObject as? String else { continue }
-            dateFormatter.timeZone = TimeZone(identifier: identifier)
-            
-            let adjustedDate = Calendar.current.date(byAdding: .hour, value: Int(offset), to: Date())
+
+        for timeZone in timeZones {
+            dateFormatter.timeZone = TimeZone(identifier: timeZone)
+            let adjustedDate = Calendar.current.date(byAdding: .hour, value: offset, to: Date())
             let timeString = dateFormatter.string(from: adjustedDate ?? Date())
-            item.title = "\(item.title.components(separatedBy: ":").first ?? ""): \(timeString)"
+            let menuItem = NSMenuItem(title: "\(timeZone): \(timeString)", action: nil, keyEquivalent: "")
+            menu?.insertItem(menuItem, at: 2)
         }
     }
 }
-
