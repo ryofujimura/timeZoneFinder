@@ -14,8 +14,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var menu: NSMenu?
     var settingsWindowController: SettingsWindowController?
     var sliderItem: NSMenuItem?
-    var resetButton: NSButton?
+    var currentTimeButton: NSButton?
     var defaultTimeZones = ["Europe/London", "Asia/Tokyo", "America/Los_Angeles"]
+    var isSliderAdjusted = false
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Set up the status bar item
@@ -71,28 +72,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let adjustedDate = Calendar.current.date(byAdding: .hour, value: offset, to: Date())
             let timeString = dateFormatter.string(from: adjustedDate ?? Date())
             let menuItemTitle = formatTimeZoneName(timeZoneIdentifier: timeZone, withOffset: offset)
-            let menuItem = NSMenuItem(title: menuItemTitle, action: nil, keyEquivalent: "")
+            let menuItem = NSMenuItem(title: "\(menuItemTitle): \(timeString)", action: nil, keyEquivalent: "")
             menu?.addItem(menuItem)
         }
 
-        // Add the slider and reset button if there are time zones selected
+        // Add the slider if there are time zones selected
         if !timeZones.isEmpty {
             if sliderItem == nil {
                 sliderItem = NSMenuItem()
                 let slider = NSSlider(value: 0, minValue: -12, maxValue: 12, target: self, action: #selector(sliderValueChanged(_:)))
+                slider.isEnabled = false // Disable the slider initially
                 sliderItem!.view = slider
             }
             menu?.addItem(sliderItem!)
+        }
 
-            if resetButton == nil {
-                resetButton = NSButton(title: "Reset Time", target: self, action: #selector(resetTime(_:)))
-                resetButton!.setButtonType(.momentaryLight)
-                resetButton!.bezelStyle = .rounded
-                resetButton!.frame = NSRect(x: 0, y: 0, width: 100, height: 20)
+        // Add the "Current Time" button if the slider is adjusted
+        if isSliderAdjusted {
+            if currentTimeButton == nil {
+                currentTimeButton = NSButton(title: "Current Time", target: self, action: #selector(resetTime(_:)))
+                currentTimeButton!.setButtonType(.momentaryLight)
+                currentTimeButton!.bezelStyle = .rounded
+                currentTimeButton!.frame = NSRect(x: 0, y: 0, width: 100, height: 20)
             }
-            let resetItem = NSMenuItem()
-            resetItem.view = resetButton
-            menu?.addItem(resetItem)
+            let currentTimeItem = NSMenuItem()
+            currentTimeItem.view = currentTimeButton
+            menu?.addItem(currentTimeItem)
         }
 
         // Add the "Add Time Zone" option back to the menu
@@ -104,6 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Function to handle changes in the slider's value
     @objc func sliderValueChanged(_ sender: NSSlider) {
         let offset = sender.intValue
+        isSliderAdjusted = offset != 0
         updateTimeZones(settingsWindowController?.selectedTimeZones ?? defaultTimeZones, offset: Int(offset))
     }
 
@@ -111,6 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func resetTime(_ sender: NSButton) {
         if let slider = sliderItem?.view as? NSSlider {
             slider.intValue = 0
+            isSliderAdjusted = false
             sliderValueChanged(slider)
         }
     }
