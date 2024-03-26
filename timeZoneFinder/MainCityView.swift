@@ -6,35 +6,59 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct MainCityView: View {
     @State private var hoveredItem: Int? = nil
-    //Text("・")
+    @State private var selectedItem = -1
+    let hour: Int = Calendar.current.component(.hour, from: Date())
+    let minute: Int = Calendar.current.component(.minute, from: Date())
+//    @State private var timeDifference = "Current"
+//    @State private var location = "Los Angeles, CA"
+    @State private var locationTime = "no time"
+    @State private var locationDate = "Today"
+    var location: String
+    var timeDifference: Int
 
     var body: some View {
         ZStack{
             Rectangle()
                 .foregroundColor(.white)
+                .cornerRadius(25.0)
             VStack (spacing: 5){
                 HStack{
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 11))]){
-                        ForEach(0...23, id: \.self) { index in
-                            Group{
-                                if hoveredItem == index {
-                                    Text("\(index)")
-                                } else {
-                                    Text("・")
-                                }
+                    ForEach(0...23, id: \.self) { index in
+                        Group{
+                            if selectedItem == index{
+                                Text("\(index)")
+                                    .font(.footnote)
+                                    .frame(width: 15, height: 15)
+                                    .padding(2)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(15)
+                                
+                            } else if hoveredItem == index {
+                                Text("\(index)")
+                                    .font(.footnote)
+                                    .frame(width: 15, height: 15)
+                                    .padding(2)
                             }
-                            .font(.footnote)
-                            .bold()
-                            .frame(width: 15, height: 15)
-                            //                            .padding(.horizontal)
-                            .padding(1)
-                            .background(hoveredItem == index ? Color.gray.opacity(0.2) : Color.clear)
-                            .cornerRadius(15)
-                            .onHover { isHovering in
-                                hoveredItem = isHovering ? index : nil
+                            else {
+                                Text("・")
+                                    .frame(width: 15, height: 15)
+                                    .font(.caption)
+                            }
+                        }
+                        .bold()
+                        .onHover{_ in 
+                            hoveredItem = index
+                        }
+                        .onTapGesture {
+                            selectedItem = index
+                        }
+                        .onAppear {
+                            if selectedItem == -1 {
+                                selectedItem = hour
                             }
                         }
                     }
@@ -43,38 +67,64 @@ struct MainCityView: View {
                     Text("🌴")
                         .frame(width: 460, alignment: .leading)
                         .font(.system(size: 40))
-                        .offset(x: -40)
+//                        .offset(x: -60)
                         .opacity(0.2)
                     VStack{
                         HStack{
-                            Text("Current")
-                                .font(.caption)
-                                .foregroundStyle(.gray)
+                            Group{
+                                if timeDifference == 0{
+                                    Text("Current")
+                                } else if timeDifference > 0 {
+                                    Text("+\(timeDifference)hrs")
+                                } else {
+                                    Text("\(timeDifference)hrs")
+                                }
+                            }
+                            .font(.callout)
+                            .foregroundStyle(.gray)
                             Spacer()
-                            Text("Today")
-                                .font(.caption)
-                                .padding(5)
-                                .background(.gray.opacity(0.2))
-                                .cornerRadius(40)
+                            Group{
+                                if hour+timeDifference > 24 {
+                                    Text("Tomorrow")
+                                } else if hour+timeDifference < 24{
+                                    Text("Yesterday")
+                                } else {
+                                    Text("Today")
+                                }
+                            }
+                            .font(.caption)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(.gray.opacity(0.2))
+                            .cornerRadius(40)
                         }
                         HStack{
-                            Text("Los Angels, USA")
+                            Text(location)
                                 .font(.title)
                                 .bold()
                             Spacer()
-                            Text("04:00 pm")
-                                .font(.title)
-                                .bold()
-                            
+                            Group{
+                                if hour+timeDifference > 24 {
+                                    Text(String(format: "%02d:%02d", hour+timeDifference-24, minute))
+                                } else if hour+timeDifference < 0{
+                                    Text(String(format: "%02d:%02d", hour+timeDifference+24, minute))
+                                } else {
+                                    Text(String(format: "%02d:%02d", hour+timeDifference, minute))
+                                }
+                            }
+                            .font(.title)
+                            .bold()
                         }
                     }
+                    .padding(.leading, 40)
                 }
             }
             .padding()
         }
+        .frame(width: 512, height: 124)
     }
 }
 
 #Preview {
-    MainCityView()
+    MainCityView(location: "Los Angeles, USA", timeDifference: 0)
 }
