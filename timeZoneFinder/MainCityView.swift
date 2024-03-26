@@ -13,8 +13,6 @@ struct MainCityView: View {
     @State private var selectedItem = -1
     let hour: Int = Calendar.current.component(.hour, from: Date())
     let minute: Int = Calendar.current.component(.minute, from: Date())
-//    @State private var timeDifference = "Current"
-//    @State private var location = "Los Angeles, CA"
     @State private var locationTime = "no time"
     @State private var locationDate = "Today"
     var location: String
@@ -29,36 +27,61 @@ struct MainCityView: View {
                 HStack{
                     ForEach(0...23, id: \.self) { index in
                         Group{
-                            if selectedItem == index{
-                                Text("\(index)")
-                                    .font(.footnote)
-                                    .frame(width: 15, height: 15)
-                                    .padding(2)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(15)
-                                
-                            } else if hoveredItem == index {
-                                Text("\(index)")
-                                    .font(.footnote)
-                                    .frame(width: 15, height: 15)
-                                    .padding(2)
-                            }
-                            else {
-                                Text("・")
-                                    .frame(width: 15, height: 15)
-                                    .font(.caption)
+                            if hour+timeDifference == index {
+                                if selectedItem == hour+timeDifference{
+                                    Text("\(hour+timeDifference)")
+                                        .frame(width: 15, height: 15)
+                                        .padding(2)
+                                        .background(Color.gray.opacity(0.2))
+                                        .cornerRadius(15)
+                                } else {
+                                    Text("\(hour+timeDifference)")
+                                        .foregroundStyle(.gray)
+                                        .frame(width: 15, height: 15)
+                                }
+                            } else {
+                                if selectedItem == index{
+                                    Text("\(index)")
+                                        .frame(width: 15, height: 15)
+                                        .padding(2)
+                                        .background(Color.gray.opacity(0.2))
+                                        .cornerRadius(15)
+                                        
+                                    
+                                } else if hoveredItem == index {
+                                    Text("\(index)")
+                                        .frame(width: 15, height: 15)
+                                        .padding(2)
+                                } else {
+                                    Text("・")
+                                        .frame(width: 15, height: 15)
+                                        .font(.caption)
+                                }
                             }
                         }
                         .bold()
-                        .onHover{_ in 
-                            hoveredItem = index
+                        .font(.footnote)
+                        .foregroundColor(.black)
+                        .onHover { isHovering in
+                            if isHovering {
+                                hoveredItem = index
+                            } 
+//                            else {
+//                                hoveredItem = nil
+//                            }
                         }
                         .onTapGesture {
                             selectedItem = index
                         }
                         .onAppear {
                             if selectedItem == -1 {
-                                selectedItem = hour
+                                if hour+timeDifference > 24 {
+                                    selectedItem = hour+timeDifference-24
+                                } else if hour+timeDifference < 0 {
+                                    selectedItem = hour+timeDifference+24
+                                } else {
+                                    selectedItem = hour+timeDifference
+                                }
                             }
                         }
                     }
@@ -86,7 +109,7 @@ struct MainCityView: View {
                             Group{
                                 if hour+timeDifference > 24 {
                                     Text("Tomorrow")
-                                } else if hour+timeDifference < 24{
+                                } else if hour+timeDifference < 0{
                                     Text("Yesterday")
                                 } else {
                                     Text("Today")
@@ -121,7 +144,7 @@ struct MainCityView: View {
             }
             .padding()
         }
-        .frame(width: 512, height: 124)
+//        .frame(width: 512, height: 124)
     }
 }
 
