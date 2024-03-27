@@ -11,12 +11,15 @@ import Foundation
 struct MainCityView: View {
     @State private var hoveredItem: Int? = nil
     @State private var selectedItem = -1
-    let hour: Int = Calendar.current.component(.hour, from: Date())
-    let minute: Int = Calendar.current.component(.minute, from: Date())
-    @State private var locationTime = "no time"
+    @State var hour: Int = Calendar.current.component(.hour, from: Date())
+    @State var minute: Int = Calendar.current.component(.minute, from: Date())
     @State private var locationDate = "Today"
+    @State private var locationHour: Int = 0
+//    @State private var adjustedTime: Int = 0
     var location: String
     var timeDifference: Int
+    var emoji: String
+    @Binding var globalAdjustedTime: Int
 
     var body: some View {
         ZStack{
@@ -24,70 +27,62 @@ struct MainCityView: View {
                 .foregroundColor(.white)
                 .cornerRadius(25.0)
             VStack (spacing: 5){
-                HStack{
+                HStack (spacing: 0){
                     ForEach(0...23, id: \.self) { index in
                         Group{
-                            if hour+timeDifference == index {
-                                if selectedItem == hour+timeDifference{
-                                    Text("\(hour+timeDifference)")
-                                        .frame(width: 15, height: 15)
-                                        .padding(2)
+                            if locationHour == index {
+                                if selectedItem == locationHour{
+                                    Text("\(locationHour)")
                                         .background(Color.gray.opacity(0.2))
                                         .cornerRadius(15)
                                 } else {
-                                    Text("\(hour+timeDifference)")
+                                    Text("\(locationHour)")
                                         .foregroundStyle(.gray)
-                                        .frame(width: 15, height: 15)
                                 }
                             } else {
                                 if selectedItem == index{
                                     Text("\(index)")
-                                        .frame(width: 15, height: 15)
-                                        .padding(2)
                                         .background(Color.gray.opacity(0.2))
                                         .cornerRadius(15)
-                                        
-                                    
                                 } else if hoveredItem == index {
                                     Text("\(index)")
-                                        .frame(width: 15, height: 15)
-                                        .padding(2)
                                 } else {
                                     Text("・")
-                                        .frame(width: 15, height: 15)
-                                        .font(.caption)
                                 }
                             }
                         }
+                        .frame(width: 15, height: 15)
                         .bold()
-                        .font(.footnote)
+                        .font(.caption2)
                         .foregroundColor(.black)
-                        .onHover { isHovering in
-                            if isHovering {
-                                hoveredItem = index
-                            } 
-//                            else {
-//                                hoveredItem = nil
-//                            }
+                        .onHover {_ in
+                            hoveredItem = index
                         }
                         .onTapGesture {
                             selectedItem = index
+                            globalAdjustedTime = index - locationHour
                         }
                         .onAppear {
-                            if selectedItem == -1 {
-                                if hour+timeDifference > 24 {
-                                    selectedItem = hour+timeDifference-24
-                                } else if hour+timeDifference < 0 {
-                                    selectedItem = hour+timeDifference+24
-                                } else {
-                                    selectedItem = hour+timeDifference
-                                }
+                            globalAdjustedTime = locationHour-index
+                            locationHour = hour+timeDifference
+                            if locationHour > 24 {
+                                locationDate = "Tomorrow"
+                                locationHour -= 24
+                            } else if locationHour < 0 {
+                                locationDate = "Yesterday"
+                                locationHour += 24
                             }
+                            selectedItem = locationHour
                         }
                     }
                 }
+                .onHover{ hovering in
+                    if !hovering {
+                        hoveredItem = nil
+                    }
+                }
                 ZStack {
-                    Text("🌴")
+                    Text(emoji)
                         .frame(width: 460, alignment: .leading)
                         .font(.system(size: 40))
 //                        .offset(x: -60)
@@ -95,7 +90,7 @@ struct MainCityView: View {
                     VStack{
                         HStack{
                             Group{
-                                if timeDifference == 0{
+                                if timeDifference == 0 {
                                     Text("Current")
                                 } else if timeDifference > 0 {
                                     Text("+\(timeDifference)hrs")
@@ -106,37 +101,21 @@ struct MainCityView: View {
                             .font(.callout)
                             .foregroundStyle(.gray)
                             Spacer()
-                            Group{
-                                if hour+timeDifference > 24 {
-                                    Text("Tomorrow")
-                                } else if hour+timeDifference < 0{
-                                    Text("Yesterday")
-                                } else {
-                                    Text("Today")
-                                }
-                            }
-                            .font(.caption)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 2)
-                            .background(.gray.opacity(0.2))
-                            .cornerRadius(40)
+                            Text(locationDate)
+                                .font(.caption)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(.gray.opacity(0.2))
+                                .cornerRadius(40)
                         }
                         HStack{
                             Text(location)
                                 .font(.title)
                                 .bold()
                             Spacer()
-                            Group{
-                                if hour+timeDifference > 24 {
-                                    Text(String(format: "%02d:%02d", hour+timeDifference-24, minute))
-                                } else if hour+timeDifference < 0{
-                                    Text(String(format: "%02d:%02d", hour+timeDifference+24, minute))
-                                } else {
-                                    Text(String(format: "%02d:%02d", hour+timeDifference, minute))
-                                }
-                            }
-                            .font(.title)
-                            .bold()
+                            Text(String(format: "%02d:%02d", locationHour+globalAdjustedTime, minute))
+                                .font(.title)
+                                .bold()
                         }
                     }
                     .padding(.leading, 40)
@@ -144,10 +123,6 @@ struct MainCityView: View {
             }
             .padding()
         }
-//        .frame(width: 512, height: 124)
+        .frame(width: 512, height: 124)
     }
-}
-
-#Preview {
-    MainCityView(location: "Los Angeles, USA", timeDifference: 0)
 }
