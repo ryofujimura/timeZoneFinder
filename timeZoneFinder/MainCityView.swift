@@ -53,7 +53,7 @@ struct MainCityView: View {
                         .opacity(0.2)
                     VStack {
                         HStack {
-                            TimeDifferenceLabel(timeDifference: timeDifference)
+                            TimeDifferenceLabel(timeDifference: timeDifference, globalAdjustedTime: $globalAdjustedTime)
                             Spacer()
                             Text(locationDate)
                                 .font(.caption)
@@ -113,7 +113,9 @@ struct TimeBarView: View {
     }
 
     private func hourLabel(for index: Int) -> String {
-        if let selected = selectedHour, selected == index {
+        if index == (currentHour + timeDifference) % 24 {
+            return String(index)
+        } else if let selected = selectedHour, selected == index {
             return String(index)
         } else if let hovered = hoveredHour, hovered == index {
             return String(index)
@@ -123,7 +125,12 @@ struct TimeBarView: View {
     }
 
     private func hourBackground(for index: Int) -> Color {
-        if let selected = selectedHour, selected == index {
+        if index == (currentHour + timeDifference) % 24 {
+            if let selected = selectedHour, selected == index{
+                return Color.gray.opacity(0.2)
+            }
+            return Color.clear
+        } else if let selected = selectedHour, selected == index {
             return Color.gray.opacity(0.2)
         } else {
             return Color.clear
@@ -133,18 +140,28 @@ struct TimeBarView: View {
 
 struct TimeDifferenceLabel: View {
     let timeDifference: Int
+    @Binding var globalAdjustedTime: Int
+
+    var adjustedTimeDifference: Int {
+        timeDifference + globalAdjustedTime
+    }
 
     var body: some View {
         Group {
-            if timeDifference == 0 {
+            if adjustedTimeDifference == 0 {
                 Text("Current")
-            } else if timeDifference > 0 {
-                Text("+\(timeDifference)hrs")
+            } else if adjustedTimeDifference > 0 {
+                Text("+\(adjustedTimeDifference)hrs")
             } else {
-                Text("\(timeDifference)hrs")
+                Text("\(adjustedTimeDifference)hrs")
             }
         }
         .font(.callout)
         .foregroundStyle(.gray)
     }
+}
+
+
+#Preview{
+    MainCityView(location: "Tokyo", timeDifference: 16, emoji: "🗼", globalAdjustedTime: .constant(0))
 }
