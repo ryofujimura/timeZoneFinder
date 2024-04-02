@@ -12,8 +12,11 @@ import SwiftUI
 struct TimezoneFinderApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+//        WindowGroup {
+//            ContentView()
+//        }
+        Settings {
+            EmptyView()
         }
     }
 }
@@ -30,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
         if let button = self.statusBarItem.button {
-            button.title = "🍎" // Your emoji icon here
+            button.title = "🌐"
             button.action = #selector(togglePopover(_:))
         }
         

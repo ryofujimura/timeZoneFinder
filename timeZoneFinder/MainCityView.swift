@@ -10,96 +10,50 @@ import Foundation
 
 struct MainCityView: View {
     @State private var hoveredItem: Int? = nil
-    @State private var selectedItem = -1
-    @State var hour: Int = Calendar.current.component(.hour, from: Date())
-    @State var minute: Int = Calendar.current.component(.minute, from: Date())
-    @State private var locationDate = "Today"
-    @State private var locationHour: Int = 0
-//    @State private var adjustedTime: Int = 0
+    @State private var selectedItem: Int?
+    @State private var currentTime = Date()
     var location: String
     var timeDifference: Int
     var emoji: String
     @Binding var globalAdjustedTime: Int
 
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
+    private var adjustedLocationTime: Date {
+        return Calendar.current.date(byAdding: .hour, value: timeDifference + globalAdjustedTime, to: currentTime) ?? Date()
+    }
+
+    private var locationDate: String {
+        let dayDifference = Calendar.current.dateComponents([.day], from: currentTime, to: adjustedLocationTime).day ?? 0
+        switch dayDifference {
+        case 1:
+            return "Tomorrow"
+        case -1:
+            return "Yesterday"
+        default:
+            return "Today"
+        }
+    }
+
     var body: some View {
-        ZStack{
+        ZStack {
             Rectangle()
                 .foregroundColor(.white)
                 .cornerRadius(25.0)
-            VStack (spacing: 5){
-                HStack (spacing: 0){
-                    ForEach(0...23, id: \.self) { index in
-                        Group{
-                            if locationHour == index {
-                                if selectedItem == locationHour{
-                                    Text("\(locationHour)")
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(15)
-                                } else {
-                                    Text("\(locationHour)")
-                                        .foregroundStyle(.gray)
-                                }
-                            } else {
-                                if selectedItem == index{
-                                    Text("\(index)")
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(15)
-                                } else if hoveredItem == index {
-                                    Text("\(index)")
-                                } else {
-                                    Text("・")
-                                }
-                            }
-                        }
-                        .frame(width: 15, height: 15)
-                        .bold()
-                        .font(.caption2)
-                        .foregroundColor(.black)
-                        .onHover {_ in
-                            hoveredItem = index
-                        }
-                        .onTapGesture {
-                            selectedItem = index
-                            globalAdjustedTime = index - locationHour
-                        }
-                        .onAppear {
-                            globalAdjustedTime = locationHour-index
-                            locationHour = hour+timeDifference
-                            if locationHour > 24 {
-                                locationDate = "Tomorrow"
-                                locationHour -= 24
-                            } else if locationHour < 0 {
-                                locationDate = "Yesterday"
-                                locationHour += 24
-                            }
-                            selectedItem = locationHour
-                        }
-                    }
-                }
-                .onHover{ hovering in
-                    if !hovering {
-                        hoveredItem = nil
-                    }
-                }
+            VStack(spacing: 5) {
+                TimeBarView(selectedHour: $selectedItem, hoveredHour: $hoveredItem, currentHour: Calendar.current.component(.hour, from: currentTime), timeDifference: timeDifference, globalAdjustedTime: $globalAdjustedTime)
                 ZStack {
                     Text(emoji)
                         .frame(width: 460, alignment: .leading)
                         .font(.system(size: 40))
-//                        .offset(x: -60)
                         .opacity(0.2)
-                    VStack{
-                        HStack{
-                            Group{
-                                if timeDifference == 0 {
-                                    Text("Current")
-                                } else if timeDifference > 0 {
-                                    Text("+\(timeDifference)hrs")
-                                } else {
-                                    Text("\(timeDifference)hrs")
-                                }
-                            }
-                            .font(.callout)
-                            .foregroundStyle(.gray)
+                    VStack {
+                        HStack {
+                            TimeDifferenceLabel(timeDifference: timeDifference)
                             Spacer()
                             Text(locationDate)
                                 .font(.caption)
@@ -108,15 +62,13 @@ struct MainCityView: View {
                                 .background(.gray.opacity(0.2))
                                 .cornerRadius(40)
                         }
-                        HStack{
+                        HStack {
                             Text(location)
-                                .font(.title)
-                                .bold()
                             Spacer()
-                            Text(String(format: "%02d:%02d", locationHour+globalAdjustedTime, minute))
-                                .font(.title)
-                                .bold()
+                            Text(dateFormatter.string(from: adjustedLocationTime))
                         }
+                        .font(.title)
+                        .bold()
                     }
                     .padding(.leading, 40)
                 }
@@ -124,5 +76,75 @@ struct MainCityView: View {
             .padding()
         }
         .frame(width: 512, height: 124)
+        .onAppear {
+            // Set the initial selected hour based on the current time and time difference
+            let initialHour = Calendar.current.component(.hour, from: adjustedLocationTime)
+            selectedItem = initialHour
+        }
+    }
+}
+
+struct TimeBarView: View {
+    @Binding var selectedHour: Int?
+    @Binding var hoveredHour: Int?
+    let currentHour: Int
+    let timeDifference: Int
+    @Binding var globalAdjustedTime: Int
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<24, id: \.self) { index in
+                Text(hourLabel(for: index))
+                    .frame(width: 15, height: 15)
+                    .bold()
+                    .font(.caption2)
+                    .foregroundColor(.black)
+                    .background(hourBackground(for: index))
+                    .cornerRadius(15)
+                    .onHover { isHovering in
+                        hoveredHour = isHovering ? index : nil
+                    }
+                    .onTapGesture {
+                        selectedHour = index
+                        globalAdjustedTime = index - (currentHour + timeDifference)
+                    }
+            }
+        }
+    }
+
+    private func hourLabel(for index: Int) -> String {
+        if let selected = selectedHour, selected == index {
+            return String(index)
+        } else if let hovered = hoveredHour, hovered == index {
+            return String(index)
+        } else {
+            return "・"
+        }
+    }
+
+    private func hourBackground(for index: Int) -> Color {
+        if let selected = selectedHour, selected == index {
+            return Color.gray.opacity(0.2)
+        } else {
+            return Color.clear
+        }
+    }
+}
+
+struct TimeDifferenceLabel: View {
+    let timeDifference: Int
+
+    var body: some View {
+        Group {
+            if timeDifference == 0 {
+                Text("Current")
+            } else if timeDifference > 0 {
+                Text("+\(timeDifference)hrs")
+            } else {
+                Text("\(timeDifference)hrs")
+            }
+        }
+        .font(.callout)
+        .foregroundStyle(.gray)
     }
 }

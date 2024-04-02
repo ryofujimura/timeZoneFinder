@@ -29,7 +29,7 @@ struct MainNavigationView: View {
                 }
                 ForEach(locations.indices, id: \.self) { city in
                     MainCityView(location: locations[city], timeDifference: timeDifferences[city], emoji: emojis[city], globalAdjustedTime: $globalAdjustedTime)
-//                        .shadow(radius: 20)
+//                        .shadow(radius: 14)
                 }
             }
             .padding()
@@ -37,43 +37,6 @@ struct MainNavigationView: View {
         .padding(.vertical, 20)
     }
 }
-//
-//
-//struct MainNavigationView: View {
-//    @State private var locationsData = [
-//        "Los Angeles, USA": (timeDifference: 0, emoji: "🌴"),
-//        "Honolulu, USA": (timeDifference: -3, emoji: "🍝"),
-//        "Chicago, USA": (timeDifference: 2, emoji: "🦘"),
-//        "Tokyo, Japan": (timeDifference: 16, emoji: "👾")
-//    ]
-//    @State private var globalAdjustedTime = 0
-//
-//    var body: some View {
-//        ZStack {
-//            Rectangle()
-//                .foregroundColor(.gray.opacity(0.05))
-//            VStack {
-//                HStack {
-//                    Text("Timezone Finder")
-//                        .font(.title3)
-//                        .bold()
-//                        .padding()
-//                    Button(action: {}, label: {
-//                        Text("+")
-//                    })
-//                }
-//                ForEach(Array(locationsData.keys), id: \.self) { location in
-//                    if let data = locationsData[location] {
-//                        MainCityView(location: location, timeDifference: data.timeDifference, globalAdjustedTime: $globalAdjustedTime, emoji: data.emoji)
-//                    }
-//                }
-//            }
-//            .padding()
-//        }
-//        .padding(.vertical, 20)
-//    }
-//}
-//
 
 #Preview {
     MainNavigationView()
