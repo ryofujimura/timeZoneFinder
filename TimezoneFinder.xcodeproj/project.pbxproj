@@ -12,6 +12,8 @@
 		AF144A332BB1FCF80005F6E3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF144A322BB1FCF80005F6E3 /* Assets.xcassets */; };
 		AF144A362BB1FCF80005F6E3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF144A352BB1FCF80005F6E3 /* Preview Assets.xcassets */; };
 		AF144A3E2BB208C50005F6E3 /* MainCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF144A3D2BB208C50005F6E3 /* MainCityView.swift */; };
+		AF4E96042BBCD967003613D0 /* SettingsCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4E96032BBCD967003613D0 /* SettingsCityView.swift */; };
+		AF4E96062BBCD978003613D0 /* SettingsNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */; };
 		AFC1097F2BB37805000677C9 /* MainNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC1097E2BB37805000677C9 /* MainNavigationView.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +25,8 @@
 		AF144A352BB1FCF80005F6E3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AF144A372BB1FCF80005F6E3 /* TimezoneFinder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimezoneFinder.entitlements; sourceTree = "<group>"; };
 		AF144A3D2BB208C50005F6E3 /* MainCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCityView.swift; sourceTree = "<group>"; };
+		AF4E96032BBCD967003613D0 /* SettingsCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCityView.swift; sourceTree = "<group>"; };
+		AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsNavigationView.swift; sourceTree = "<group>"; };
 		AFC1097E2BB37805000677C9 /* MainNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainNavigationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -57,10 +61,12 @@
 			isa = PBXGroup;
 			children = (
 				AF144A2E2BB1FCF60005F6E3 /* TimezoneFinderApp.swift */,
-				AFC1097E2BB37805000677C9 /* MainNavigationView.swift */,
 				AF144A302BB1FCF60005F6E3 /* ContentView.swift */,
-				AF144A322BB1FCF80005F6E3 /* Assets.xcassets */,
+				AFC1097E2BB37805000677C9 /* MainNavigationView.swift */,
 				AF144A3D2BB208C50005F6E3 /* MainCityView.swift */,
+				AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */,
+				AF4E96032BBCD967003613D0 /* SettingsCityView.swift */,
+				AF144A322BB1FCF80005F6E3 /* Assets.xcassets */,
 				AF144A372BB1FCF80005F6E3 /* TimezoneFinder.entitlements */,
 				AF144A342BB1FCF80005F6E3 /* Preview Content */,
 			);
@@ -148,6 +154,8 @@
 				AF144A312BB1FCF60005F6E3 /* ContentView.swift in Sources */,
 				AF144A2F2BB1FCF60005F6E3 /* TimezoneFinderApp.swift in Sources */,
 				AFC1097F2BB37805000677C9 /* MainNavigationView.swift in Sources */,
+				AF4E96062BBCD978003613D0 /* SettingsNavigationView.swift in Sources */,
+				AF4E96042BBCD967003613D0 /* SettingsCityView.swift in Sources */,
 				AF144A3E2BB208C50005F6E3 /* MainCityView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

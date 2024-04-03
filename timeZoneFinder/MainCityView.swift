@@ -15,6 +15,7 @@ struct MainCityView: View {
     var location: String
     var timeDifference: Int
     var emoji: String
+    @State var hour: Int = Calendar.current.component(.hour, from: Date())
     @Binding var globalAdjustedTime: Int
 
     private let dateFormatter: DateFormatter = {
@@ -28,11 +29,12 @@ struct MainCityView: View {
     }
 
     private var locationDate: String {
-        let dayDifference = Calendar.current.dateComponents([.day], from: currentTime, to: adjustedLocationTime).day ?? 0
+        _ = (hour + timeDifference + globalAdjustedTime) % 24
+        let dayDifference = (hour + timeDifference + globalAdjustedTime) / 24
         switch dayDifference {
-        case 1:
+        case 1, -23:
             return "Tomorrow"
-        case -1:
+        case -1, 23:
             return "Yesterday"
         default:
             return "Today"
@@ -48,17 +50,18 @@ struct MainCityView: View {
                 TimeBarView(selectedHour: $selectedItem, hoveredHour: $hoveredItem, currentHour: Calendar.current.component(.hour, from: currentTime), timeDifference: timeDifference, globalAdjustedTime: $globalAdjustedTime)
                 ZStack {
                     Text(emoji)
-                        .frame(width: 460, alignment: .leading)
+                        .frame(width: 512, alignment: .leading)
+                        .offset(x:-20)
                         .font(.system(size: 40))
                         .opacity(0.2)
                     VStack {
                         HStack {
-                            TimeDifferenceLabel(timeDifference: timeDifference, globalAdjustedTime: $globalAdjustedTime)
+                            TimeDifferenceLabel(timeDifference: timeDifference, globalAdjustedTime: globalAdjustedTime)
                             Spacer()
                             Text(locationDate)
                                 .font(.caption)
                                 .padding(.horizontal, 7)
-                                .padding(.vertical, 2)
+                                .padding(.vertical, 5)
                                 .background(.gray.opacity(0.2))
                                 .cornerRadius(40)
                         }
@@ -70,12 +73,13 @@ struct MainCityView: View {
                         .font(.title)
                         .bold()
                     }
-                    .padding(.leading, 40)
+                    .padding(.horizontal, 20)
                 }
             }
-            .padding()
+            .foregroundColor(.black)
         }
-        .frame(width: 512, height: 124)
+        .frame(height: 124)
+        .clipped() 
         .onAppear {
             // Set the initial selected hour based on the current time and time difference
             let initialHour = Calendar.current.component(.hour, from: adjustedLocationTime)
@@ -140,10 +144,10 @@ struct TimeBarView: View {
 
 struct TimeDifferenceLabel: View {
     let timeDifference: Int
-    @Binding var globalAdjustedTime: Int
+    let globalAdjustedTime: Int
 
     var adjustedTimeDifference: Int {
-        timeDifference + globalAdjustedTime
+        return timeDifference + globalAdjustedTime
     }
 
     var body: some View {
@@ -160,6 +164,7 @@ struct TimeDifferenceLabel: View {
         .foregroundStyle(.gray)
     }
 }
+
 
 
 #Preview{
