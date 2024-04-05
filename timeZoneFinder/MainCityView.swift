@@ -45,41 +45,47 @@ struct MainCityView: View {
         ZStack {
             Rectangle()
                 .foregroundColor(.white)
-                .cornerRadius(25.0)
-            VStack(spacing: 5) {
+                .cornerRadius(8)
+            VStack(spacing: 4) {
                 TimeBarView(selectedHour: $selectedItem, hoveredHour: $hoveredItem, currentHour: Calendar.current.component(.hour, from: currentTime), timeDifference: timeDifference, globalAdjustedTime: $globalAdjustedTime)
-                ZStack {
+                HStack (spacing: 0) {
                     Text(emoji)
-                        .frame(width: 512, alignment: .leading)
-                        .offset(x:-20)
-                        .font(.system(size: 40))
                         .opacity(0.2)
-                    VStack {
-                        HStack {
-                            TimeDifferenceLabel(timeDifference: timeDifference, globalAdjustedTime: globalAdjustedTime)
-                            Spacer()
+                        .font(.system(size: 48))
+                        .frame(width: 48)
+                        .offset(x:-24)
+                        .clipped()
+                        .frame(width: 24)
+                        .offset(x:12)
+                    VStack (spacing: 0) {
+                        HStack (spacing: 0) {
                             Text(locationDate)
-                                .font(.caption)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 5)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
                                 .background(.gray.opacity(0.2))
                                 .cornerRadius(40)
+                            Spacer()
+                            TimeDifferenceLabel(timeDifference: timeDifference, globalAdjustedTime: globalAdjustedTime)
                         }
-                        HStack {
+                        .foregroundStyle(.gray)
+                        .font(.system(.caption, design: .rounded).weight(.bold))
+                        .kerning(0.8)
+                        HStack (spacing: 0) {
                             Text(location)
                             Spacer()
                             Text(dateFormatter.string(from: adjustedLocationTime))
                         }
-                        .font(.title)
-                        .bold()
+                        .font(.system(.title2, design: .rounded).weight(.heavy))
+                        .kerning(0.62)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 8)
+                    .frame(width: 392-24)
                 }
             }
             .foregroundColor(.black)
         }
-        .frame(height: 124)
-        .clipped() 
+        
+        .frame(width: 392, height: 84)
         .onAppear {
             // Set the initial selected hour based on the current time and time difference
             let initialHour = Calendar.current.component(.hour, from: adjustedLocationTime)
@@ -99,9 +105,10 @@ struct TimeBarView: View {
         HStack(spacing: 0) {
             ForEach(0..<24, id: \.self) { index in
                 Text(hourLabel(for: index))
-                    .frame(width: 15, height: 15)
+                    .padding(1)
+                    .frame(width: 16, height: 16)
                     .bold()
-                    .font(.caption2)
+                    .font(.system(.caption, design: .rounded).weight(.medium))
                     .foregroundColor(.black)
                     .background(hourBackground(for: index))
                     .cornerRadius(15)
@@ -160,13 +167,9 @@ struct TimeDifferenceLabel: View {
                 Text("\(adjustedTimeDifference)hrs")
             }
         }
-        .font(.callout)
-        .foregroundStyle(.gray)
     }
 }
 
-
-
 #Preview{
-    MainCityView(location: "Tokyo", timeDifference: 16, emoji: "🗼", globalAdjustedTime: .constant(0))
+    MainCityView(location: "Tokyo", timeDifference: 5, emoji: "🗼", globalAdjustedTime: .constant(0))
 }

@@ -30,7 +30,9 @@ struct MainNavigationView: View {
             VStack (spacing: 20 ) {
                 HStack{
                     Text("Timezone Finder")
-                        .font(.title3)
+                        .font(.body)
+                        .kerning(1.04)
+                        .fontWeight(.heavy)
                         .bold()
                     Spacer()
                     Button(action: {
@@ -56,7 +58,7 @@ struct MainNavigationView: View {
             .rotation3DEffect(.degrees(settingsView ? 0 : 180), axis: (x: 0, y: 1, z: 0))
         }
         .foregroundColor(.black)
-        .background(Color.white.opacity(0.9))
+//        .background(Color.white.opacity(0.9))
         .frame(width: 512)
         .padding()
     }

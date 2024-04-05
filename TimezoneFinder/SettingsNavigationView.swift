@@ -11,6 +11,8 @@ struct SettingsNavigationView: View {
     @Binding var cityData: [String: (timeDifference: Int, emoji: String)]
     @Binding var settingsView: Bool
     @State private var searchText = ""
+    var settings = ["12hr", "24hr"]
+    @State private var selectedOption = "12hr"
 
     var body: some View {
         ZStack {
@@ -18,23 +20,14 @@ struct SettingsNavigationView: View {
                 HStack (spacing: 5) {
                     HStack {
                         Image(systemName: "magnifyingglass")
-                        TextField("Search City", text: $searchText)
+                        Spacer()
+                        CitySearchView()
                     }
                     .font(.caption)
                     .bold()
                     .padding(.leading, 10)
                     .padding(.vertical, 5)
                     .background(Color.white.opacity(0.04))
-                    .cornerRadius(20)
-                    .overlay(
-                        HStack {
-                            if !searchText.isEmpty {
-                                Button(action: { self.searchText = "" }) {
-                                    Image(systemName: "multiply.circle")
-                                }
-                            }
-                        }
-                    )
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.8)) {
                             self.settingsView.toggle()
@@ -60,14 +53,36 @@ struct SettingsNavigationView: View {
                     }
                     .padding(.vertical, 5)
                 }
-                .padding()
+                .padding(5)
                 .background(Color.white)
                 .cornerRadius(15)
 //                .frame(width: 512)
                 Spacer()
+                Group{
+                    Divider()
+                    Group {
+                        HStack {
+                            Text("Settings:")
+                            HStack {
+                               OptionButton(option: "12hr", selectedOption: $selectedOption)
+                               OptionButton(option: "24hr", selectedOption: $selectedOption)
+                           }
+                        }
+                        HStack {
+                            Text("About:     ")
+                            Text("Designed and Developed by FUJIMURAs in California")
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                }
+                .frame(width: 512-20 , alignment: .leading)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .foregroundColor(Color.gray)
             }
-            .padding()
+//            .padding()
         }
+        .padding()
         .font(.headline)
         .foregroundColor(.black)
         .frame(width: 512)
@@ -85,29 +100,31 @@ struct SettingsNavigationView: View {
     }
 }
 
-struct CityDetailView: View {
-    var city: String
+struct OptionButton: View {
+    let option: String
+    @Binding var selectedOption: String
 
     var body: some View {
-        VStack {
-            Text("Hello")
-            Text(city)
+        HStack {
+            Image(systemName: selectedOption == option ? "record.circle" : "circle")
+                .foregroundColor(.gray.opacity(0.5))
+            Text(option)
+                .foregroundColor(.gray)
         }
-        .padding()
+        .background(Color.clear)
+        .frame(width: 55)
+        .contentShape(Rectangle()) // Specify the tappable area
+        .onTapGesture(perform: {
+            selectedOption = option
+        })
     }
 }
 
 struct OvalTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-//            .padding(10)
-//            .background(LinearGradient(gradient: Gradient(colors: [Color.orange, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-//            .background(Color.black.opacity(0.2))
-//            .cornerRadius(10)
             .background(Color.white.opacity(0.5))
             .cornerRadius(20)
-           
-//            .shadow(color: .gray, radius: 10)
     }
 }
 
