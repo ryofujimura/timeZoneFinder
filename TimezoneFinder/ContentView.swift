@@ -9,9 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-//        MainNavigationView()
+        MainNavigationView()
 
-        CitySearchView()
+//        CitySearchView()
             .preferredColorScheme(.light)
     }
 }
