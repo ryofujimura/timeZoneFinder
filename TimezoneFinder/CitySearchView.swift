@@ -7,69 +7,62 @@
 
 import SwiftUI
 
+// MARK: - Timezone Detail Model
+struct TimezoneDetail: Identifiable {
+    let id = UUID()
+    var identifier: String
+    var city: String
+    var country: String
+    var timeDifference: String
+}
+
+// MARK: - City Search View
 struct CitySearchView: View {
-    @State private var searchText: String = ""
-    @State private var showSuggestions: Bool = false
-
-    var filteredTimeZones: [String] {
-        if searchText.isEmpty {
-            return []
-        } else {
-            return TimeZone.knownTimeZoneIdentifiers.filter { $0.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
-
+    @State private var searchText = ""
+    @State private var searchResults = [String]()
+    @State private var showResults = false
+    
     var body: some View {
         VStack {
-            TextField("Search Timezones", text: $searchText)
-                .onChange(of: searchText) { newSearchText in
-                    showSuggestions = !newSearchText.isEmpty
+            TextField("Search for a timezone", text: $searchText)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .onChange(of: searchText) {
+                    searchTimezone(query: searchText)
                 }
-                .modifier(TextFieldClearButton(text: $searchText))
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+                    self.showResults = false
+                }
 
-            if showSuggestions {
-                List {
-                    ForEach(filteredTimeZones, id: \.self) { identifier in
-                        Text(formatTimeZone(identifier: identifier))
-                            .onTapGesture {
-                                searchText = formatTimeZone(identifier: identifier)
-                                showSuggestions = false
-                            }
+            if showResults && !searchResults.isEmpty {
+                List(searchResults, id: \.self) { result in
+                    Text(result).onTapGesture {
+                        self.selectTimezone(identifier: result)
+                        self.showResults = false
                     }
                 }
-                .frame(maxHeight: 200)
+//                .frame(maxHeight: 200)
+                .border(Color.gray, width: 1)
             }
         }
-//        .padding()
+        .frame(height: 1000)
     }
 
-    func formatTimeZone(identifier: String) -> String {
-        let components = identifier.split(separator: "/")
-        let city = components.last?.replacingOccurrences(of: "_", with: " ") ?? ""
-        let country = components.first ?? ""
-        return "\(city), \(country.prefix(3))"
-    }
-}
-
-struct TextFieldClearButton: ViewModifier {
-    @Binding var text: String
-
-    func body(content: Content) -> some View {
-        HStack {
-            content
-            if !text.isEmpty {
-                Button(action: {
-                    text = ""
-                }) {
-                    Image(systemName: "multiply.circle.fill")
-                        .foregroundColor(.secondary)
-                }
-                .padding(.trailing, 8)
-            }
+    private func searchTimezone(query: String) {
+        guard !query.isEmpty else {
+            searchResults = []
+            showResults = false
+            return
         }
+        searchResults = TimeZone.knownTimeZoneIdentifiers.filter { $0.localizedCaseInsensitiveContains(query) }
+        showResults = true
+    }
+
+    private func selectTimezone(identifier: String) {
+        // Handle the selection, potentially updating the UI or performing other actions
+        print("Selected timezone: \(identifier)")
     }
 }
-
 
 
 #Preview {
