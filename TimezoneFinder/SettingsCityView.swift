@@ -24,43 +24,35 @@ struct SettingsCityView: View {
     }
     
     var body: some View {
-        HStack{
+        HStack (spacing: 8) {
             Text(emoji)
-                .opacity(0.2)
+                .font(.system(.callout, design: .rounded).weight(.regular))
+                .opacity(0.8)
             Text(location)
+//                    .padding(.vertical, 1.5)
             Spacer()
-            if timeDifference+Calendar.current.component(.hour, from: Date()) > 24 {
-                Text("+1")
-                    .padding( 5 )
-                    .padding(.horizontal, 5)
-                    .foregroundColor(.gray)
-                    .bold(false)
-                    .background(Color.black.opacity(0.05))
-                    .cornerRadius(25)
-                Text(cityTime)
-            } else if timeDifference+Calendar.current.component(.hour, from: Date()) < 0 {
-                Text("-1")
-                    .padding( 5 )
-                    .padding(.horizontal, 5)
-                    .foregroundColor(.gray)
-                    .bold(false)
-                    .background(Color.black.opacity(0.05))
-                    .cornerRadius(25)
-                Text(cityTime)
-            } else {
-                Text(cityTime)
+            Group{
+                if timeDifference+Calendar.current.component(.hour, from: Date()) > 24 {
+                    Text("+1")
+                } else if timeDifference+Calendar.current.component(.hour, from: Date()) < 0 {
+                    Text("-1")
+                }
             }
-            Text("x")
+            .padding(.vertical, 2)
+            .padding(.horizontal, 8)
+            .foregroundColor(.gray)
+            .background(Color.black.opacity(0.05))
+            .cornerRadius(25)
+            Text(cityTime)
+            Image(systemName: "xmark")
         }
-//        .font(.callout)
-        .background(Color.white)
-        .bold()
-        .foregroundColor(.black)
-//        .cornerRadius(20)
-        .frame(width: 512-100)
+        .font(.system(.caption, design: .rounded).weight(.heavy))
+        .frame(width: 376, height: 17)
+//        .background(Color.white)
+        .cornerRadius(20)
     }
 }
 
 #Preview {
-    SettingsCityView(emoji: "🌺", location: "Los Angeles, USA", timeDifference: 4)
+    SettingsCityView(emoji: "🌺", location: "Los Angeles, USA", timeDifference: 14)
 }

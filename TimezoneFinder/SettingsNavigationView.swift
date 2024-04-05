@@ -17,75 +17,66 @@ struct SettingsNavigationView: View {
     var body: some View {
         ZStack {
             VStack (spacing: 0) {
-                HStack (spacing: 5) {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                        Spacer()
-                        CitySearchView()
-                    }
-                    .font(.caption)
-                    .bold()
-                    .padding(.leading, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.04))
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.8)) {
+                HStack (spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.caption)
+                    CitySearchView()
+                    Image(systemName: "plus")
+                        .foregroundColor(.gray)
+                        .onTapGesture {
                             self.settingsView.toggle()
                         }
-                    }) {
-                        Text("+")
-                            .foregroundColor(.gray)
-                    }
-                    .cornerRadius(25)
-                    .padding(5)
                 }
-//                .padding()
+                .font(.system(.caption, design: .rounded).weight(.bold))
                 .foregroundColor(.gray)
-//                .frame(width: 512-100)
-                .background(.white.opacity(0.2))
-                .cornerRadius(25)
-                .padding()
-                VStack (spacing: 0 ) {
-                    ForEach(cityData.sorted(by: { $0.value.timeDifference < $1.value.timeDifference }), id: \.key) { city, info in
-                        if let cityInfo = cityData[city] {
-                            SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                        }
-                    }
-                    .padding(.vertical, 5)
-                }
-                .padding(5)
-                .background(Color.white)
-                .cornerRadius(15)
-//                .frame(width: 512)
-                Spacer()
-                Group{
-                    Divider()
-                    Group {
-                        HStack {
-                            Text("Settings:")
-                            HStack {
-                               OptionButton(option: "12hr", selectedOption: $selectedOption)
-                               OptionButton(option: "24hr", selectedOption: $selectedOption)
-                           }
-                        }
-                        HStack {
-                            Text("About:     ")
-                            Text("Designed and Developed by FUJIMURAs in California")
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                }
-                .frame(width: 512-20 , alignment: .leading)
                 .padding(.vertical, 4)
                 .padding(.horizontal, 8)
-                .foregroundColor(Color.gray)
+                
+                VStack (spacing: 4) {
+                    let sortedCityArray = cityData.sorted { $0.value.timeDifference < $1.value.timeDifference }
+                    ForEach(Array(sortedCityArray.enumerated()), id: \.element.key) { index, cityTuple in
+                        let (city, info) = cityTuple
+                        if index > 0 {
+                            Divider()
+                                .foregroundColor(.gray)
+                        }
+                        SettingsCityView(emoji: info.emoji, location: city, timeDifference: info.timeDifference)
+                            .padding(8)
+                    }
+                }
+//                .background(Color.white)
+//                .cornerRadius(15)                
+                Spacer()
+                
+                VStack (spacing: 4 ) {
+                    Divider()
+                    HStack (spacing: 0) {
+                        Text("Settings")
+                            .padding(.horizontal, 4)
+                            .font(.system(.caption, design: .rounded).weight(.bold))
+                        OptionButton(option: "12hr", selectedOption: $selectedOption)
+                        OptionButton(option: "24hr", selectedOption: $selectedOption)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+                    HStack (spacing: 4) {
+                        Text("About    ")
+                            .padding(.horizontal, 4)
+//                            .frame(width: 392-322, alignment: .leading)
+                        Text("Designed and Developed by フジムラ3 in California")
+                            .padding(.horizontal, 4)
+                            .fontWeight(.regular)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+                }
+                .foregroundColor(.gray)
+                .font(.system(.caption, design: .rounded).weight(.bold))
             }
-//            .padding()
+            .frame(width: 392)
         }
-        .padding()
-        .font(.headline)
-        .foregroundColor(.black)
-        .frame(width: 512)
+        .padding(12)
+//        .frame(width: 416)
     }
 
     private func deleteCity(at offsets: IndexSet) {
@@ -105,14 +96,15 @@ struct OptionButton: View {
     @Binding var selectedOption: String
 
     var body: some View {
-        HStack {
+        HStack (spacing: 0) {
             Image(systemName: selectedOption == option ? "record.circle" : "circle")
                 .foregroundColor(.gray.opacity(0.5))
+                .padding(.horizontal, 4)
             Text(option)
-                .foregroundColor(.gray)
         }
-        .background(Color.clear)
-        .frame(width: 55)
+        .fontWeight(.regular)
+//        .background(Color.clear)
+        .frame(width: 55, alignment: .leading)
         .contentShape(Rectangle()) // Specify the tappable area
         .onTapGesture(perform: {
             selectedOption = option

@@ -57,7 +57,7 @@ struct MainCityView: View {
                         .clipped()
                         .frame(width: 24)
                         .offset(x:12)
-                    VStack (spacing: 0) {
+                    VStack (spacing: 2) {
                         HStack (spacing: 0) {
                             Text(locationDate)
                                 .padding(.horizontal, 8)
@@ -72,6 +72,11 @@ struct MainCityView: View {
                         .kerning(0.8)
                         HStack (spacing: 0) {
                             Text(location)
+                                .padding(.vertical, 1.5)
+//                                Text("トウキョウ")
+//                                    .opacity(0.2)
+//                                    .blur(radius: 1)
+//                                    .offset(x:60, y:8)
                             Spacer()
                             Text(dateFormatter.string(from: adjustedLocationTime))
                         }
@@ -79,10 +84,11 @@ struct MainCityView: View {
                         .kerning(0.62)
                     }
                     .padding(.horizontal, 8)
+//                    .padding(.vertical, 6)
                     .frame(width: 392-24)
                 }
             }
-            .foregroundColor(.black)
+//            .foregroundColor(.black)
         }
         
         .frame(width: 392, height: 84)
@@ -109,7 +115,6 @@ struct TimeBarView: View {
                     .frame(width: 16, height: 16)
                     .bold()
                     .font(.system(.caption, design: .rounded).weight(.medium))
-                    .foregroundColor(.black)
                     .background(hourBackground(for: index))
                     .cornerRadius(15)
                     .onHover { isHovering in
@@ -171,5 +176,5 @@ struct TimeDifferenceLabel: View {
 }
 
 #Preview{
-    MainCityView(location: "Tokyo", timeDifference: 5, emoji: "🗼", globalAdjustedTime: .constant(0))
+    MainCityView(location: "Tokyo, Japan", timeDifference: 5, emoji: "🗼", globalAdjustedTime: .constant(0))
 }
