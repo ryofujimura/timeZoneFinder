@@ -16,6 +16,7 @@
 		AF4E96062BBCD978003613D0 /* SettingsNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */; };
 		AF952CDA2BBF624800F4EFBF /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF952CD92BBF624800F4EFBF /* CitySearchView.swift */; };
 		AFC1097F2BB37805000677C9 /* MainNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC1097E2BB37805000677C9 /* MainNavigationView.swift */; };
+		AFDDFB0C2BC0A0E000986E66 /* CityDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDDFB0B2BC0A0E000986E66 /* CityDataModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsNavigationView.swift; sourceTree = "<group>"; };
 		AF952CD92BBF624800F4EFBF /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		AFC1097E2BB37805000677C9 /* MainNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainNavigationView.swift; sourceTree = "<group>"; };
+		AFDDFB0B2BC0A0E000986E66 /* CityDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityDataModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 				AFC1097E2BB37805000677C9 /* MainNavigationView.swift */,
 				AF144A3D2BB208C50005F6E3 /* MainCityView.swift */,
 				AF952CD92BBF624800F4EFBF /* CitySearchView.swift */,
+				AFDDFB0B2BC0A0E000986E66 /* CityDataModel.swift */,
 				AF4E96032BBCD967003613D0 /* SettingsCityView.swift */,
 				AF4E96052BBCD978003613D0 /* SettingsNavigationView.swift */,
 				AF144A322BB1FCF80005F6E3 /* Assets.xcassets */,
@@ -156,6 +159,7 @@
 			files = (
 				AF144A312BB1FCF60005F6E3 /* ContentView.swift in Sources */,
 				AF952CDA2BBF624800F4EFBF /* CitySearchView.swift in Sources */,
+				AFDDFB0C2BC0A0E000986E66 /* CityDataModel.swift in Sources */,
 				AF144A2F2BB1FCF60005F6E3 /* TimezoneFinderApp.swift in Sources */,
 				AFC1097F2BB37805000677C9 /* MainNavigationView.swift in Sources */,
 				AF4E96062BBCD978003613D0 /* SettingsNavigationView.swift in Sources */,

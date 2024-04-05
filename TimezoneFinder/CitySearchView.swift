@@ -4,24 +4,14 @@
 //
 //  Created by ryo fujimura on 4/4/24.
 //
-
 import SwiftUI
 
 struct CitySearchView: View {
-    @State private var cities: [CityTimeZone] = []
+    @StateObject var viewModel: CityDataViewModel
     @State private var newCity = ""
-    @State private var newTimeZoneIdentifier = ""
     @State private var showSuggestions = false
-    @State private var cityData: [String: CityInfo] = [:] {
-        didSet {
-            saveCityData()
-        }
-    }
+    @Binding var settingsView: Bool
 
-    init() {
-        loadCityData()
-    }
-    
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
         "Chicago": "🍕",
@@ -41,7 +31,7 @@ struct CitySearchView: View {
     ]
 
     let randomEmojis = ["🌍", "🌎", "🌏", "🏙️", "🌆", "🌇", "🏞️"]
-    
+
     var cityTimeZones: [String: String] {
         var cityTimeZoneMap: [String: String] = [:]
         for identifier in TimeZone.knownTimeZoneIdentifiers {
@@ -53,112 +43,113 @@ struct CitySearchView: View {
         }
         return cityTimeZoneMap
     }
-    
+
     var filteredCities: [String] {
         cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
     }
-    
+
     var body: some View {
-        List {
-            Section {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                    TextField("New City", text: $newCity)
-                        .onChange(of: newCity) {
-                            showSuggestions = !newCity.isEmpty
+        VStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                TextField("New City", text: $newCity)
+                    .onChange(of: newCity) {
+                        showSuggestions = !newCity.isEmpty
                     }
-                    Image(systemName: "plus")
+            }
+            .font(.system(.caption, design: .rounded).weight(.bold))
+            .foregroundColor(.gray)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+
+            if showSuggestions {
+                if filteredCities.isEmpty {
+                    Text("No cities found")
                         .foregroundColor(.gray)
-                }
-                .font(.system(.caption, design: .rounded).weight(.bold))
-                .foregroundColor(.gray)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 8)
-                
-                if showSuggestions {
-                    if filteredCities.isEmpty {
-                        Text("No cities found")
-                            .foregroundColor(.gray)
-                    } else {
+                        .frame(height: 80)
+                } else {
+                    ScrollView {
                         ForEach(filteredCities, id: \.self) { city in
-                            HStack {
-                                Text(city)
-                                Spacer()
-                                Button(action: { addCity(city: city) }) {
-                                    Image(systemName: "plus.circle")
-                                        .foregroundColor(.green)
+                            suggestionView(for: city)
+                                .onTapGesture {
+                                    addCity(city: city)
                                 }
-                            }
                         }
                     }
+                    .frame(height: 80)
                 }
             }
-            
-            Section(header: Text("Selected Cities")) {
-                ForEach(Array(cityData.keys.sorted()), id: \.self) { city in
-                    if let cityInfo = cityData[city] {
-                        HStack {
-                            SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                            Spacer()
-                            Button(action: { deleteSelectedCity(city: city) }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
+
+            Text("Your Cities")
+            ForEach(Array(viewModel.cityData.keys.sorted()), id: \.self) { city in
+                if let cityInfo = viewModel.cityData[city] {
+                    HStack {
+                        SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                        Spacer()
+                        Image(systemName: "xmark")
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                deleteSelectedCity(city: city)
                             }
-                        }
                     }
                 }
             }
         }
     }
-    
+
+    func suggestionView(for city: String) -> some View {
+        let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+        let timeZoneIdentifier = cityTimeZones[city] ?? ""
+        let timeZone = TimeZone(identifier: timeZoneIdentifier)
+        _ = timeZone?.secondsFromGMT() ?? 0 / 3600
+
+        return HStack(spacing: 8) {
+            Text(emoji)
+                .font(.system(.callout, design: .rounded).weight(.regular))
+                .opacity(0.8)
+            Text(city)
+            Spacer()
+            Text(cityTime(for: city))
+                .foregroundColor(.gray)
+        }
+        .font(.system(.caption, design: .rounded))
+        .frame(height: 17)
+        .cornerRadius(20)
+    }
+
     func addCity(city: String) {
-        if let timeZone = cityTimeZones[city] {
-            // Get the current hour in the local time zone
-            let localHour = Calendar.current.component(.hour, from: Date())
-            
-            // Get the current hour in the selected city's time zone
-            if let cityTimeZone = TimeZone(identifier: timeZone) {
-                var cityDateComponents = Calendar.current.dateComponents(in: cityTimeZone, from: Date())
-                let cityHour = cityDateComponents.hour ?? 0
-                
-                // Calculate the time difference
-                let timeDifference = cityHour - localHour
-                
-                // Assign an emoji
-                let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
-                
-                // Update the cityData dictionary
-                cityData[city] = CityInfo(timeDifference: timeDifference, emoji: emoji)
-            }
-            
+        if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
+            let localTimeZone = TimeZone.current
+            let localTime = Date()
+
+            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
+            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
+
+            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
+
+            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+
+            viewModel.cityData[city] = CityInfo(timeDifference: timeDifference, emoji: emoji)
+
             newCity = ""
-            newTimeZoneIdentifier = ""
             showSuggestions = false
         }
     }
 
-    
     func deleteSelectedCity(city: String) {
-        cityData.removeValue(forKey: city)
+        viewModel.cityData.removeValue(forKey: city)
     }
-    
-    func saveCityData() {
-        if let encoded = try? JSONEncoder().encode(cityData) {
-            UserDefaults.standard.set(encoded, forKey: "cityData")
-        }
-    }
-    
-    func loadCityData() {
-        if let savedCityData = UserDefaults.standard.data(forKey: "cityData"),
-           let decodedCityData = try? JSONDecoder().decode([String: CityInfo].self, from: savedCityData) {
-            cityData = decodedCityData
-        }
-    }
-}
 
-struct CityInfo: Codable {
-    var timeDifference: Int
-    var emoji: String
+    func cityTime(for city: String) -> String {
+        guard let timeZoneIdentifier = cityTimeZones[city],
+              let timeZone = TimeZone(identifier: timeZoneIdentifier) else {
+            return "Error"
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        formatter.timeZone = timeZone
+        return formatter.string(from: Date())
+    }
 }
 
 struct CityTimeZone: Identifiable {
@@ -167,20 +158,6 @@ struct CityTimeZone: Identifiable {
     var timeZoneIdentifier: String
 }
 
-struct SettingsCityViewone: View {
-    var emoji: String
-    var location: String
-    var timeDifference: Int
-
-    var body: some View {
-        HStack {
-            Text("\(emoji) \(location)")
-            Spacer()
-            Text("Time difference: \(timeDifference) hours")
-        }
-    }
-}
-
 #Preview {
-    CitySearchView()
+    CitySearchView(viewModel: CityDataViewModel(), settingsView: .constant(true))
 }

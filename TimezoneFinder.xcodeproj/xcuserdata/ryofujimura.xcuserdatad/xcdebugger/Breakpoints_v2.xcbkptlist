@@ -3,4 +3,22 @@
    uuid = "323C3231-3909-4632-B688-D54891633AAA"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8226CD71-8035-45BE-8545-FFBA630CBF91"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../var/folders/d3/t4kx49k54v9b_llyg96gm77m0000gn/T/swift-generated-sources/@__swiftmacro_14TimezoneFinder33_D9147874A6352C0B9AE364DCEF269860Ll7PreviewfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s14TimezoneFinder33_D9147874A6352C0B9AE364DCEF269860Ll7PreviewfMf_15PreviewRegistryfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
