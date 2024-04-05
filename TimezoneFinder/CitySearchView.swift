@@ -12,8 +12,36 @@ struct CitySearchView: View {
     @State private var newCity = ""
     @State private var newTimeZoneIdentifier = ""
     @State private var showSuggestions = false
+    @State private var cityData: [String: CityInfo] = [:] {
+        didSet {
+            saveCityData()
+        }
+    }
+
+    init() {
+        loadCityData()
+    }
     
-    // Generate a list of city names and their time zones from the available time zone identifiers
+    let cityEmojis: [String: String] = [
+        "Los Angeles": "🌴",
+        "Chicago": "🍕",
+        "Honolulu": "🌺",
+        "Tokyo": "🗼",
+        "New York": "🗽",
+        "Sydney": "🦘",
+        "Rome": "🍝",
+        "London": "🎡",
+        "San Francisco": "🌉",
+        "Seattle": "☕",
+        "Amsterdam": "🚲",
+        "Beijing": "🐉",
+        "Athens": "🏛️",
+        "Mexico City": "🌮",
+        "Las Vegas": "🎰",
+    ]
+
+    let randomEmojis = ["🌍", "🌎", "🌏", "🏙️", "🌆", "🌇", "🏞️"]
+    
     var cityTimeZones: [String: String] {
         var cityTimeZoneMap: [String: String] = [:]
         for identifier in TimeZone.knownTimeZoneIdentifiers {
@@ -30,72 +58,107 @@ struct CitySearchView: View {
         cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
     }
     
-    // Function to get the current time in a given time zone
-    func currentTimeInTimeZone(_ timeZoneIdentifier: String) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .medium
-        formatter.timeZone = TimeZone(identifier: timeZoneIdentifier)
-        return formatter.string(from: Date())
-    }
-    
     var body: some View {
         List {
-            ForEach(cities) { cityTimeZone in
-                HStack {
-                    Text(cityTimeZone.city)
-                    Spacer()
-                    Text(currentTimeInTimeZone(cityTimeZone.timeZoneIdentifier))
-                }
-            }
-            .onDelete(perform: removeCity)
-            
             Section {
-                TextField("New City", text: $newCity)
-//                        .autocapitalization(.words)
-                    .onChange(of: newCity) {
-                        showSuggestions = !newCity.isEmpty
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                    TextField("New City", text: $newCity)
+                        .onChange(of: newCity) {
+                            showSuggestions = !newCity.isEmpty
                     }
+                    Image(systemName: "plus")
+                        .foregroundColor(.gray)
+                }
+                .font(.system(.caption, design: .rounded).weight(.bold))
+                .foregroundColor(.gray)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
                 
                 if showSuggestions {
-                    ForEach(filteredCities, id: \.self) { city in
-                        Button(city) {
-                            selectCity(city)
+                    if filteredCities.isEmpty {
+                        Text("No cities found")
+                            .foregroundColor(.gray)
+                    } else {
+                        ForEach(filteredCities, id: \.self) { city in
+                            HStack {
+                                Text(city)
+                                Spacer()
+                                Button(action: { addCity(city: city) }) {
+                                    Image(systemName: "plus.circle")
+                                        .foregroundColor(.green)
+                                }
+                            }
                         }
                     }
                 }
             }
             
-            Button(action: addCity) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.green)
-                    Text("Add City")
+            Section(header: Text("Selected Cities")) {
+                ForEach(Array(cityData.keys.sorted()), id: \.self) { city in
+                    if let cityInfo = cityData[city] {
+                        HStack {
+                            SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                            Spacer()
+                            Button(action: { deleteSelectedCity(city: city) }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
                 }
             }
-            .disabled(newCity.isEmpty || newTimeZoneIdentifier.isEmpty)
-            
         }
     }
     
-    func selectCity(_ city: String) {
-        newCity = city
-        newTimeZoneIdentifier = cityTimeZones[city] ?? ""
-        showSuggestions = false
-    }
-    
-    func addCity() {
-        if let timeZone = cityTimeZones[newCity] {
-            let newCityTimeZone = CityTimeZone(city: newCity, timeZoneIdentifier: timeZone)
-            cities.append(newCityTimeZone)
+    func addCity(city: String) {
+        if let timeZone = cityTimeZones[city] {
+            // Get the current hour in the local time zone
+            let localHour = Calendar.current.component(.hour, from: Date())
+            
+            // Get the current hour in the selected city's time zone
+            if let cityTimeZone = TimeZone(identifier: timeZone) {
+                var cityDateComponents = Calendar.current.dateComponents(in: cityTimeZone, from: Date())
+                let cityHour = cityDateComponents.hour ?? 0
+                
+                // Calculate the time difference
+                let timeDifference = cityHour - localHour
+                
+                // Assign an emoji
+                let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+                
+                // Update the cityData dictionary
+                cityData[city] = CityInfo(timeDifference: timeDifference, emoji: emoji)
+            }
+            
             newCity = ""
             newTimeZoneIdentifier = ""
             showSuggestions = false
         }
     }
+
     
-    func removeCity(at offsets: IndexSet) {
-        cities.remove(atOffsets: offsets)
+    func deleteSelectedCity(city: String) {
+        cityData.removeValue(forKey: city)
     }
+    
+    func saveCityData() {
+        if let encoded = try? JSONEncoder().encode(cityData) {
+            UserDefaults.standard.set(encoded, forKey: "cityData")
+        }
+    }
+    
+    func loadCityData() {
+        if let savedCityData = UserDefaults.standard.data(forKey: "cityData"),
+           let decodedCityData = try? JSONDecoder().decode([String: CityInfo].self, from: savedCityData) {
+            cityData = decodedCityData
+        }
+    }
+}
+
+struct CityInfo: Codable {
+    var timeDifference: Int
+    var emoji: String
 }
 
 struct CityTimeZone: Identifiable {
@@ -104,6 +167,19 @@ struct CityTimeZone: Identifiable {
     var timeZoneIdentifier: String
 }
 
+struct SettingsCityViewone: View {
+    var emoji: String
+    var location: String
+    var timeDifference: Int
+
+    var body: some View {
+        HStack {
+            Text("\(emoji) \(location)")
+            Spacer()
+            Text("Time difference: \(timeDifference) hours")
+        }
+    }
+}
 
 #Preview {
     CitySearchView()

@@ -20,7 +20,7 @@ struct SettingsNavigationView: View {
                 HStack (spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .font(.caption)
-                    CitySearchView()
+                    Text("Textfield")
                     Image(systemName: "plus")
                         .foregroundColor(.gray)
                         .onTapGesture {

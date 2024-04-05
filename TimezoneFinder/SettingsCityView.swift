@@ -44,7 +44,6 @@ struct SettingsCityView: View {
             .background(Color.black.opacity(0.05))
             .cornerRadius(25)
             Text(cityTime)
-            Image(systemName: "xmark")
         }
         .font(.system(.caption, design: .rounded).weight(.heavy))
         .frame(width: 376, height: 17)

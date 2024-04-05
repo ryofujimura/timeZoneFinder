@@ -25,12 +25,17 @@ struct MainNavigationView: View {
 //            Rectangle()
 //                .foregroundColor(.white.opacity(0.9))
             VStack {
-                SettingsNavigationView(cityData: $cityData, settingsView: $settingsView)
+                Spacer()
+                    .frame(height: 100)
+                CitySearchView()
+//                SettingsNavigationView(cityData: $cityData, settingsView: $settingsView)
                 Spacer()
             }
             .opacity(settingsView ? 0 : 1.0)
             .rotation3DEffect(.degrees(settingsView ? 0 : 0), axis: (x: 0, y: 1, z: 0))
             VStack (spacing: 12 ) {
+                Spacer()
+                    .frame(height: 100)
                 HStack (spacing: 0 ) {
                     Text("Timezone Finder")
                         .font(.system(.body, design: .rounded).weight(.heavy))
