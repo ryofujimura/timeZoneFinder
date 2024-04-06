@@ -78,7 +78,7 @@ struct CitySearchView: View {
         //            .padding(.horizontal, 8)
                     if showSuggestions {
                         if filteredCities.isEmpty {
-                            Text("Oops. Looks like there’s a typo :/")
+                            Text("Oops. Looks like\nthere’s a typo :/")
                                 .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.4))
                                 .font(.system(.caption, design: .rounded).weight(.bold))
                                 .frame(height: 80)
