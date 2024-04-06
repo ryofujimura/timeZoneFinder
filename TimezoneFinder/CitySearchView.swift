@@ -11,6 +11,7 @@ struct CitySearchView: View {
     @State private var newCity = ""
     @State private var showSuggestions = false
     @Binding var settingsView: Bool
+    @State private var selectedOption = "24hr"
 
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
@@ -49,52 +50,119 @@ struct CitySearchView: View {
     }
 
     var body: some View {
-        VStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                TextField("New City", text: $newCity)
-                    .onChange(of: newCity) {
-                        showSuggestions = !newCity.isEmpty
+        VStack (spacing: 12) {
+            ZStack {
+                if showSuggestions{
+                    Rectangle()
+                        .foregroundColor(Color.white)
+                        .cornerRadius(8)
+                }
+                VStack{
+                    HStack (spacing: 0) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(showSuggestions ? .black : .gray)
+                        TextField("Search for a city", text: $newCity)
+                            .padding(.leading, 8)
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .foregroundColor(showSuggestions ? .black : .gray)
+                            .onChange(of: newCity) {
+                                showSuggestions = !newCity.isEmpty
+                            }
                     }
+                    .padding(8)
+                    .font(.system(.caption, design: .rounded).weight(.regular))
+                    .foregroundColor(.gray)
+                    .background(Color.white)
+                    .cornerRadius(8)
+        //            .padding(.vertical, 4)
+        //            .padding(.horizontal, 8)
+                    if showSuggestions {
+                        if filteredCities.isEmpty {
+                            Text("Oops. Looks like there’s a typo :/")
+                                .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.4))
+                                .font(.system(.caption, design: .rounded).weight(.bold))
+                                .frame(height: 80)
+                            Spacer()
+                        } else {
+                            ScrollView (showsIndicators: false) {
+                                ForEach(filteredCities, id: \.self) { city in
+                                    HStack {
+                                        suggestionView(for: city)
+                                            .background(Color.white)
+                                            .cornerRadius(25)
+                                            .onTapGesture {
+                                                addCity(city: city)
+                                        }
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 10)
+                                    }
+                                }
+                            }
+                            .frame(width: 392-16)
+                        }
+                    }
+                }
             }
-            .font(.system(.caption, design: .rounded).weight(.bold))
-            .foregroundColor(.gray)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-
-            if showSuggestions {
-                if filteredCities.isEmpty {
-                    Text("No cities found")
-                        .foregroundColor(.gray)
-                        .frame(height: 80)
-                } else {
-                    ScrollView {
-                        ForEach(filteredCities, id: \.self) { city in
-                            suggestionView(for: city)
+            VStack (spacing: 12) {
+                Text("Your List")
+                    .font(.system(.caption, design: .rounded).weight(.bold))
+                    .foregroundColor(.gray)
+                    .frame(width: 392-16, alignment: .leading)
+                HStack{
+                    SettingsCityView(emoji: "📍", location: "Your Location", timeDifference: 0)
+                    Image(systemName: "lock.fill")
+                        .font(.system(size:8, design: .rounded).weight(.bold))
+                        .contentShape(Rectangle())
+                }
+                .frame(width: 392-16)
+                ForEach(Array(viewModel.cityData.keys.sorted()), id: \.self) { city in
+                    if let cityInfo = viewModel.cityData[city] {
+                        HStack {
+                            SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                            Spacer()
+                            Image(systemName: "xmark")
+                                .font(.system(size:8, design: .rounded).weight(.bold))
+                                .contentShape(Rectangle())
                                 .onTapGesture {
-                                    addCity(city: city)
+                                    deleteSelectedCity(city: city)
                                 }
                         }
                     }
-                    .frame(height: 80)
                 }
+                .frame(width: 392-16)
             }
-
-            Text("Your Cities")
-            ForEach(Array(viewModel.cityData.keys.sorted()), id: \.self) { city in
-                if let cityInfo = viewModel.cityData[city] {
-                    HStack {
-                        SettingsCityView(emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                        Spacer()
-                        Image(systemName: "xmark")
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                deleteSelectedCity(city: city)
-                            }
-                    }
+//            .padding(.horizontal, 8)
+            
+            
+            Spacer()
+            VStack (spacing: 4 ) {
+                Divider()
+                HStack (spacing: 0) {
+                    Text("Settings")
+                        .padding(.horizontal, 4)
+                        .font(.system(.caption, design: .rounded).weight(.bold))
+                    OptionButton(option: "12hr", selectedOption: $selectedOption)
+                    OptionButton(option: "24hr", selectedOption: $selectedOption)
+                    Spacer()
                 }
+                .padding(.horizontal, 4)
+                HStack (spacing: 4) {
+                    Text("About    ")
+                        .padding(.horizontal, 4)
+//                            .frame(width: 392-322, alignment: .leading)
+                    Text("Designed and Developed by フジムラ3 in California")
+                        .padding(.horizontal, 4)
+                        .fontWeight(.regular)
+                    Spacer()
+                }
+                .padding(.horizontal, 4)
             }
+            .foregroundColor(.gray)
+            .font(.system(.caption, design: .rounded).weight(.bold))
         }
+        .padding(12)
+        .frame(width: 392+12+12)
     }
 
     func suggestionView(for city: String) -> some View {
@@ -110,7 +178,7 @@ struct CitySearchView: View {
             Text(city)
             Spacer()
             Text(cityTime(for: city))
-                .foregroundColor(.gray)
+                .foregroundColor(.black)
         }
         .font(.system(.caption, design: .rounded))
         .frame(height: 17)

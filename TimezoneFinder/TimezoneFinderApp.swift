@@ -33,14 +33,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
         if let button = self.statusBarItem.button {
-            button.title = "🌐"
+            button.title = "☁"
             button.action = #selector(togglePopover(_:))
         }
         
         // Initialize the popover
         let contentView = ContentView()
         let popover = NSPopover()
-        popover.contentSize = NSSize(width: 392, height: 450)
+        popover.contentSize = NSSize(width: 416, height: 416)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: contentView)
         self.popover = popover

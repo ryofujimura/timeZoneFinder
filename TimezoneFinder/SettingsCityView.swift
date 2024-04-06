@@ -46,7 +46,7 @@ struct SettingsCityView: View {
             Text(cityTime)
         }
         .font(.system(.caption, design: .rounded).weight(.heavy))
-        .frame(width: 376, height: 17)
+        .frame(height: 17)
 //        .background(Color.white)
         .cornerRadius(20)
     }

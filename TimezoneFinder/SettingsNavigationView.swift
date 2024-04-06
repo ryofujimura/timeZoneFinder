@@ -103,8 +103,9 @@ struct OptionButton: View {
             Text(option)
         }
         .fontWeight(.regular)
+        .padding(.trailing, 4)
 //        .background(Color.clear)
-        .frame(width: 55, alignment: .leading)
+//        .frame(width: 55, alignment: .leading)
         .contentShape(Rectangle()) // Specify the tappable area
         .onTapGesture(perform: {
             selectedOption = option

@@ -9,10 +9,7 @@ import Foundation
 
 class CityDataViewModel: ObservableObject {
     @Published var cityData: [String: CityInfo] = [
-        "London, UK": CityInfo(timeDifference: 0, emoji: "🎡"),
-        "Honolulu, USA": CityInfo(timeDifference: -10, emoji: "🌺"),
         "Los Angeles, USA": CityInfo(timeDifference: -7, emoji: "🌴"),
-        "New York, USA": CityInfo(timeDifference: -4, emoji: "🗽")
     ]
 
     init() {
