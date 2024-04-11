@@ -5,29 +5,28 @@
 //  Created by ryo fujimura on 3/25/24.
 //
 
+import Cocoa
 import SwiftUI
-//import AppKit
 
 @main
 struct TimezoneFinderApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-//        WindowGroup {
-//            ContentView()
-//        }
         Settings {
             EmptyView()
         }
     }
 }
 
-import Cocoa
-
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem!
     var popover: NSPopover?
     private var eventMonitor: EventMonitor?
-    
+
+    // Reference to CityDataModel
+    var cityDataModel = CityDataModel()
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize the status bar item
         self.statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -38,7 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         // Initialize the popover
-        let contentView = ContentView()
+        let contentView = ContentView().environmentObject(cityDataModel)
         let popover = NSPopover()
         popover.contentSize = NSSize(width: 416, height: 416)
         popover.behavior = .transient
@@ -71,6 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func closePopover(_ sender: AnyObject?) {
         popover?.performClose(sender)
         eventMonitor?.stop()
+        cityDataModel.settingsView = true
     }
 }
 
@@ -98,4 +98,8 @@ class EventMonitor {
             monitor = nil
         }
     }
+}
+
+class CityDataModel: ObservableObject {
+    @Published var settingsView: Bool = true
 }

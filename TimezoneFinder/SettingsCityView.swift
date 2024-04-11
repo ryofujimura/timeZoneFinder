@@ -8,14 +8,18 @@
 import SwiftUI
 
 struct SettingsCityView: View {
+    @ObservedObject var viewModel: CityDataViewModel
     var emoji: String
     var location: String
     var timeDifference: Int
+    
     var cityTime: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = viewModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.amSymbol = "am"
+        formatter.pmSymbol = "pm"
 
-        // Calculate the date and time with the time difference
         if let adjustedDate = Calendar.current.date(byAdding: .hour, value: timeDifference, to: Date()) {
             return formatter.string(from: adjustedDate)
         } else {
@@ -29,29 +33,30 @@ struct SettingsCityView: View {
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
             Text(location)
-//                    .padding(.vertical, 1.5)
             Spacer()
-            Group{
-                if timeDifference+Calendar.current.component(.hour, from: Date()) > 24 {
+            Group {
+                if timeDifference + Calendar.current.component(.hour, from: Date()) > 24 {
                     Text("+1")
-                } else if timeDifference+Calendar.current.component(.hour, from: Date()) < 0 {
+                } else if timeDifference + Calendar.current.component(.hour, from: Date()) < 0 {
                     Text("-1")
                 }
             }
             .padding(.vertical, 2)
             .padding(.horizontal, 8)
-            .foregroundColor(.gray)
-            .background(Color.black.opacity(0.05))
+            .foregroundColor(.darkGray)
+            .background(Color.lightGray)
             .cornerRadius(25)
             Text(cityTime)
         }
         .font(.system(.caption, design: .rounded).weight(.heavy))
         .frame(height: 17)
-//        .background(Color.white)
         .cornerRadius(20)
     }
 }
 
+
 #Preview {
-    SettingsCityView(emoji: "🌺", location: "Los Angeles, USA", timeDifference: 14)
+    SettingsCityView(viewModel: CityDataViewModel(), emoji: "🌍", location: "New York", timeDifference: -5)
+
+//    SettingsCityView(emoji: "🌺", location: "Los Angeles, USA", timeDifference: 14, selectedOption: "12hr")
 }

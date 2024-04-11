@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    
     var body: some View {
         MainNavigationView()
-
 //        CitySearchView()
             .preferredColorScheme(.light)
+//            .onAppear {
+//                viewModel.settingsView = true
+//            }
     }
 }
 

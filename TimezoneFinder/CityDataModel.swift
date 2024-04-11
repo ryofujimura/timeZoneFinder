@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import SwiftUI
 
 class CityDataViewModel: ObservableObject {
-    @Published var cityData: [String: CityInfo] = [
-        "Los Angeles, USA": CityInfo(timeDifference: -7, emoji: "🌴"),
-    ]
+    @Published var timeFormat: String = "12hr"
+    @Published var cityData: [String: CityInfo] = [:]
+    @Published var settingsView = true
 
     init() {
         loadCityData()
@@ -32,4 +33,10 @@ class CityDataViewModel: ObservableObject {
 struct CityInfo: Codable {
     var timeDifference: Int
     var emoji: String
+}
+
+extension Color {
+    static let offblack = Color(red: 16/256, green: 16/256, blue: 16/256)
+    static let darkGray = Color(red: 132/256, green: 132/256, blue: 132/256)
+    static let lightGray = Color(red: 245/256, green: 245/256, blue: 245/256)
 }
