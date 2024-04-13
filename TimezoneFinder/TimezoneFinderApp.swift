@@ -5,13 +5,11 @@
 //  Created by ryo fujimura on 3/25/24.
 //
 
-import Cocoa
 import SwiftUI
 
 @main
 struct TimezoneFinderApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
     var body: some Scene {
         Settings {
             EmptyView()
@@ -24,55 +22,60 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover?
     private var eventMonitor: EventMonitor?
 
-    // Reference to CityDataModel
-    var cityDataModel = CityDataModel()
+    var cityDataModel = CityDataViewModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Initialize the status bar item
-        self.statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        
-        if let button = self.statusBarItem.button {
-            button.title = "☁"
+        setupStatusBarItem()
+        setupPopover()
+        setupEventMonitor()
+    }
+    
+    private func setupStatusBarItem() {
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        if let button = statusBarItem.button {
+            button.title = "☁" // Consider making this title more descriptive or configurable
             button.action = #selector(togglePopover(_:))
         }
-        
-        // Initialize the popover
+    }
+
+    private func setupPopover() {
         let contentView = ContentView().environmentObject(cityDataModel)
-        let popover = NSPopover()
-        popover.contentSize = NSSize(width: 416, height: 416)
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: contentView)
-        self.popover = popover
-        
-        // Setup the event monitor
-        self.eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+        popover = NSPopover()
+        popover?.contentSize = NSSize(width: 416, height: 416)
+        popover?.behavior = .transient
+        popover?.contentViewController = NSHostingController(rootView: contentView)
+    }
+
+    private func setupEventMonitor() {
+        eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             if let strongSelf = self, strongSelf.popover?.isShown ?? false {
                 strongSelf.closePopover(event)
             }
         }
     }
-    
+
     @objc func togglePopover(_ sender: AnyObject?) {
-        if let popover = popover, popover.isShown {
+        if popover?.isShown == true {
             closePopover(sender)
         } else {
             showPopover(sender)
         }
     }
     
-    func showPopover(_ sender: AnyObject?) {
+    private func showPopover(_ sender: AnyObject?) {
         if let button = statusBarItem.button {
             popover?.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
             eventMonitor?.start()
         }
     }
     
-    func closePopover(_ sender: AnyObject?) {
+    private func closePopover(_ sender: AnyObject?) {
         popover?.performClose(sender)
         eventMonitor?.stop()
         cityDataModel.settingsView = true
     }
 }
+
 
 class EventMonitor {
     private var monitor: Any?
@@ -98,8 +101,4 @@ class EventMonitor {
             monitor = nil
         }
     }
-}
-
-class CityDataModel: ObservableObject {
-    @Published var settingsView: Bool = true
 }

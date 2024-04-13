@@ -9,79 +9,83 @@ import SwiftUI
 
 struct MainNavigationView: View {
     @StateObject var viewModel = CityDataViewModel()
-    
     @State private var globalAdjustedTime = 0
-//    @State private var settingsView = true
-    
-    
+
     var body: some View {
         ZStack {
-            VStack {
-                HStack(spacing: 0) {
-                    TimezoneFinderView()
-                    Spacer()
-                    Text("☁")
-                        .font(.system(size: 16, design: .rounded).weight(.bold))
-                        .foregroundColor(.offblack)
-                        .padding(.trailing, 8)
-                        .onTapGesture {
-                            viewModel.settingsView.toggle()
-                        }
-                }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 4)
-                .frame(width: 416)
-                
-                CitySearchView(viewModel: viewModel, settingsView: $viewModel.settingsView)
-                Spacer()
-            }
-            .opacity(viewModel.settingsView ? 0 : 1.0)
-            
-            VStack(spacing: 12) {
-                HStack(spacing: 0) {
-                    TimezoneFinderView()
-                    Spacer()
-                    Image(systemName: "gear")
-                        .font(.system(size: 16, design: .rounded).weight(.bold))
-                        .foregroundColor(.offblack)
-                        .padding(.trailing, 4)
-                        .onTapGesture {
-                            viewModel.settingsView.toggle()
-                        }
-                }
-                .padding(.horizontal, 12)
-                .frame(width: 416)
-                
-                MainCityView(viewModel: viewModel, location: "Your Location", timeDifference: 0, emoji: "📍", globalAdjustedTime: $globalAdjustedTime)
-                    .id(globalAdjustedTime)
-                
-                if viewModel.cityData.isEmpty {
-                    
-                    HStack (spacing: 3) {
-                        Text("Hit")
-                        Image(systemName: "gear")
-                        Text("icon at top right to add new cities! :)")
-                    }
-                    .padding(.vertical, 100)
-                    .foregroundColor(.darkGray.opacity(0.4))
-                    .font(.system(.caption, design: .rounded).weight(.bold))
-
+            Group {
+                if !viewModel.settingsView {
+                    mainContent
                 } else {
-                    VStack(spacing: 8) {
-                        ForEach(viewModel.cityData.sorted(by: { $0.value.timeDifference < $1.value.timeDifference }), id: \.key) { city, info in
-                            MainCityView(viewModel: viewModel, location: city, timeDifference: info.timeDifference, emoji: info.emoji, globalAdjustedTime: $globalAdjustedTime)
-                                .id(globalAdjustedTime)
-                        }
-                    }
+                    settingsContent
                 }
-                Spacer()
             }
-            .opacity(viewModel.settingsView ? 1.0 : 0)
         }
         .padding(.top, 12)
         .frame(width: 416)
     }
     
+    private var mainContent: some View {
+        VStack {
+            headerView(icon: "circle", action: {
+                viewModel.settingsView.toggle()
+            })
+            
+            CitySearchView(viewModel: viewModel)
+            Spacer()
+        }
+    }
+
+    private var settingsContent: some View {
+        VStack(spacing: 12) {
+            headerView(icon: "gear", action: {
+                viewModel.settingsView.toggle()
+            })
+
+            MainCityView(viewModel: viewModel, location: "Your Location", timeDifference: 0, emoji: "📍", globalAdjustedTime: $globalAdjustedTime)
+                .id(globalAdjustedTime)
+            
+            cityListView
+            Spacer()
+        }
+    }
+
+    private func headerView(icon: String, action: @escaping () -> Void) -> some View {
+        HStack(spacing: 0) {
+            TimezoneFinderView()
+            Spacer()
+            Image(systemName: icon) // Using system image instead of text
+                .font(.system(size: 16, design: .rounded).weight(.bold))
+                .foregroundColor(.offblack)
+                .padding(.trailing, 8)
+                .onTapGesture(perform: action)
+        }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 4)
+        .frame(width: 416)
+    }
+
+    private var cityListView: some View {
+        Group {
+            if viewModel.cityData.isEmpty {
+                HStack(spacing: 3) {
+                    Text("Hit")
+                    Image(systemName: "gear")
+                    Text("icon at top right to add new cities! :)")
+                }
+                .padding(.vertical, 100)
+                .foregroundColor(.darkGray.opacity(0.4))
+                .font(.system(.caption, design: .rounded).weight(.bold))
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.cityData.sorted(by: { $0.value.timeDifference < $1.value.timeDifference }), id: \.key) { city, info in
+                        MainCityView(viewModel: viewModel, location: city, timeDifference: info.timeDifference, emoji: info.emoji, globalAdjustedTime: $globalAdjustedTime)
+                            .id(globalAdjustedTime)
+                    }
+                }
+            }
+        }
+    }
 }
 
 struct TimezoneFinderView: View {
@@ -94,6 +98,7 @@ struct TimezoneFinderView: View {
     }
 }
 
+// Preview
 #Preview {
     MainNavigationView(viewModel: CityDataViewModel())
 }

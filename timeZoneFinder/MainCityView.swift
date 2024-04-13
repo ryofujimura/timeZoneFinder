@@ -45,6 +45,7 @@ struct MainCityView: View {
 //            return "Today"
 //        }
 //    }
+    
     private var locationDate: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMMM d, yyyy"
@@ -201,7 +202,8 @@ struct TimeDifferenceLabel: View {
     }
 }
 
-#Preview{
+
+#Preview {
 //    MainCityView(viewModel: viewModel, location: "Your Location", timeDifference: 0, emoji: "📍", globalAdjustedTime: $globalAdjustedTime)
     MainCityView(viewModel: CityDataViewModel(), location: "Tokyo, Japan", timeDifference: 5, emoji: "🌴", globalAdjustedTime: .constant(1))
 }

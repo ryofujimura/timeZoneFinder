@@ -10,7 +10,6 @@ struct CitySearchView: View {
     @StateObject var viewModel: CityDataViewModel
     @State private var newCity = ""
     @State private var showSuggestions = false
-    @Binding var settingsView: Bool
 
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
@@ -126,8 +125,9 @@ struct CitySearchView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
                     HStack {
+                        
                         SettingsCityView(viewModel: viewModel, emoji: "📍", location: "Your Location", timeDifference: 0)
-                        Image(systemName: "lock.fill")
+                        Image(systemName: "lock")
                             .font(.system(size: 12, design: .rounded))
                             .contentShape(Rectangle())
                     }
@@ -137,7 +137,7 @@ struct CitySearchView: View {
                                 SettingsCityView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
                                 Spacer()
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 12, design: .rounded).weight(.bold))
+                                    .font(.system(size: 12, design: .rounded))
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         deleteSelectedCity(city: city)
@@ -148,7 +148,7 @@ struct CitySearchView: View {
                 }
                 .padding(.bottom, 8)
             }
-            .frame(maxHeight: 110)
+            .frame(minHeight: 110)
         }
         .padding(8)
 //        .padding(.horizontal, 8)
@@ -270,5 +270,5 @@ struct CityTimeZone: Identifiable {
 
 
 #Preview {
-    CitySearchView(viewModel: CityDataViewModel(), settingsView: .constant(true))
+    CitySearchView(viewModel: CityDataViewModel())
 }

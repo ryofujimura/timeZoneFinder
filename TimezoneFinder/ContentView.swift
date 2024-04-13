@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var viewModel = CityDataViewModel()
     
     var body: some View {
         MainNavigationView()
-//        CitySearchView()
             .preferredColorScheme(.light)
-//            .onAppear {
-//                viewModel.settingsView = true
-//            }
+            .onAppear(){
+                viewModel.settingsView = false
+            }
     }
 }
 
