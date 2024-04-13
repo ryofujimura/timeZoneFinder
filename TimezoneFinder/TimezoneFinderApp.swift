@@ -4,28 +4,55 @@
 //
 //  Created by ryo fujimura on 3/25/24.
 //
+//
 
 import SwiftUI
-import AppKit
 
 @main
-struct TimezoneFinderApp: App {
+struct MyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {
+            EmptyView()
         }
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var popover: NSPopover!
+    var statusBarItem: NSStatusItem!
+    var contentView: ContentView?  // Hold ContentView as an optional
+
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if let window = NSApplication.shared.windows.first {
-            window.setContentSize(NSSize(width: 500, height: 123)) // Initial size
-            window.minSize = NSSize(width: 500, height: 123) // Minimum size
-            window.maxSize = NSSize(width: 500, height: 123) // Minimum 
+        initializePopover()
+    }
+
+    func initializePopover() {
+        contentView = ContentView()  // Instantiate ContentView
+
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 400, height: 300)
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: contentView!)
+        
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        if let button = statusBarItem.button {
+            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "Open app")
+            button.action = #selector(togglePopover(_:))
+        }
+    }
+
+    @objc func togglePopover(_ sender: AnyObject?) {
+        if let button = statusBarItem.button {
+            if popover.isShown {
+                popover.performClose(sender)
+            } else {
+                // Reset the view every time before showing the popover
+                contentView = ContentView()
+                popover.contentViewController = NSHostingController(rootView: contentView!)
+                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            }
         }
     }
 }
-
-//    .frame(width: 500, height: 123)

@@ -8,12 +8,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var showingBack = false
+
     var body: some View {
-        MainCityView()
+        if showingBack {
+            BackView(flipToFront: { showingBack = false })
+        } else {
+            FrontView(flipToBack: { showingBack = true })
+        }
+    }
+
+    func resetView() {
+        showingBack = false
     }
 }
 
-
-#Preview {
-    ContentView()
-}
