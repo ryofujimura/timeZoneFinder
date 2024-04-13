@@ -12,8 +12,20 @@ struct FrontView: View {
 
     var body: some View {
         VStack {
-            HeaderView(titleText: "Front View", flipToBack: flipToBack, iconImage: Image(systemName: "circle"))
+            HeaderView(titleText: "Front View", flipTo: flipToBack, iconImage: Image(systemName: "circle"))
+            FrontBodyView()
         }
     }
 }
 
+struct FrontBodyView: View {
+    var body: some View {
+        Text("hello")
+    }
+}
+
+
+
+#Preview {
+    FrontView(flipToBack: { })
+}
