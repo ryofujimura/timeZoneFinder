@@ -14,6 +14,8 @@
 		AF68C34B2BCA356F008F1665 /* logo.jpg in Resources */ = {isa = PBXBuildFile; fileRef = AF68C34A2BCA356F008F1665 /* logo.jpg */; };
 		AF68C34F2BCA3F07008F1665 /* FrontView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C34E2BCA3F07008F1665 /* FrontView.swift */; };
 		AF68C3512BCA3F10008F1665 /* BackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3502BCA3F10008F1665 /* BackView.swift */; };
+		AF68C3532BCA4799008F1665 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3522BCA4799008F1665 /* DataModel.swift */; };
+		AF68C3552BCA4A36008F1665 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3542BCA4A36008F1665 /* ViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		AF68C34A2BCA356F008F1665 /* logo.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = logo.jpg; sourceTree = "<group>"; };
 		AF68C34E2BCA3F07008F1665 /* FrontView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontView.swift; sourceTree = "<group>"; };
 		AF68C3502BCA3F10008F1665 /* BackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackView.swift; sourceTree = "<group>"; };
+		AF68C3522BCA4799008F1665 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
+		AF68C3542BCA4A36008F1665 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +64,8 @@
 			children = (
 				AF144A2E2BB1FCF60005F6E3 /* TimezoneFinderApp.swift */,
 				AF144A302BB1FCF60005F6E3 /* ContentView.swift */,
+				AF68C3522BCA4799008F1665 /* DataModel.swift */,
+				AF68C3542BCA4A36008F1665 /* ViewModel.swift */,
 				AF68C34E2BCA3F07008F1665 /* FrontView.swift */,
 				AF68C3502BCA3F10008F1665 /* BackView.swift */,
 				AF144A322BB1FCF80005F6E3 /* Assets.xcassets */,
@@ -149,9 +155,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF68C3532BCA4799008F1665 /* DataModel.swift in Sources */,
 				AF144A312BB1FCF60005F6E3 /* ContentView.swift in Sources */,
 				AF68C3512BCA3F10008F1665 /* BackView.swift in Sources */,
 				AF68C34F2BCA3F07008F1665 /* FrontView.swift in Sources */,
+				AF68C3552BCA4A36008F1665 /* ViewModel.swift in Sources */,
 				AF144A2F2BB1FCF60005F6E3 /* TimezoneFinderApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

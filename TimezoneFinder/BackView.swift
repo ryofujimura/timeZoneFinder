@@ -19,5 +19,6 @@ struct BackView: View {
                 flipToFront()
             }
         }
+        .padding()
     }
 }

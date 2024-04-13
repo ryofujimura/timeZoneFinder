@@ -12,12 +12,8 @@ struct FrontView: View {
 
     var body: some View {
         VStack {
-            Text("Front View")
-                .font(.largeTitle)
-                .padding()
-            Button("Go to Back View") {
-                flipToBack()
-            }
+            HeaderView(titleText: "Front View", flipToBack: flipToBack, iconImage: Image(systemName: "circle"))
         }
     }
 }
+
