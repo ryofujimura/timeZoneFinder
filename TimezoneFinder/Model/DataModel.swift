@@ -8,12 +8,21 @@
 import Foundation
 import SwiftUI
 
-class CityDataViewModel: ObservableObject {
-    @Published var timeFormat: String = "12hr"
-    @Published var cityData: [String: CityInfo] = [:]
+class DataModel: ObservableObject {
+    @Published var timeFormat: String = "12hr" {
+        didSet {
+            UserDefaults.standard.set(timeFormat, forKey: "timeFormat")
+        }
+    }
+    @Published var cityData: [String: CityInfo] = [:] {
+        didSet {
+            saveCityData()
+        }
+    }
 
     init() {
         loadCityData()
+        loadTimeFormat()
     }
 
     func saveCityData() {
@@ -24,9 +33,13 @@ class CityDataViewModel: ObservableObject {
 
     func loadCityData() {
         if let savedData = UserDefaults.standard.data(forKey: "cityData"),
-        let decodedData = try? JSONDecoder().decode([String: CityInfo].self, from: savedData) {
+           let decodedData = try? JSONDecoder().decode([String: CityInfo].self, from: savedData) {
             cityData = decodedData
         }
+    }
+
+    func loadTimeFormat() {
+        timeFormat = UserDefaults.standard.string(forKey: "timeFormat") ?? "12hr"
     }
 }
 

@@ -9,7 +9,7 @@
 import SwiftUI
 
 @main
-struct MyApp: App {
+struct TimezoneFinderApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -24,6 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem!
     var contentView: ContentView?  // Hold ContentView as an optional
 
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         initializePopover()
     }
@@ -50,9 +51,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             } else {
                 // Reset the view every time before showing the popover
                 contentView = ContentView()
-                popover.contentViewController = NSHostingController(rootView: contentView!)
+                let hostingController = NSHostingController(rootView: contentView!)
+                popover.contentViewController = hostingController
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                
+                // Make the popover the active and key window
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                hostingController.view.window?.makeKey()
             }
         }
     }
+
 }
+
