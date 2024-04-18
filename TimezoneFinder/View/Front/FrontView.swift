@@ -14,9 +14,10 @@ struct FrontView: View {
     
     var body: some View {
         VStack {
-            HeaderView(titleText: "Matcha Time", flipTo: flipToBack, iconImage: Image(systemName: "gear"))
+            HeaderView(titleText: "Matcha Time", flipTo: flipToBack, iconImage: Image(systemName: "line.3.horizontal"))
             FrontBodyView(viewModel: viewModel)
         }
+        .frame(minHeight: 416)
     }
 }
 

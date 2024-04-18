@@ -13,7 +13,7 @@ struct BackView: View {
 
     var body: some View {
         VStack {
-            HeaderView(titleText: "Settings", flipTo: flipToFront, iconImage: Image("vector"))
+            HeaderView(titleText: "Matcha Time", flipTo: flipToFront, iconImage: Image("vector"))
             BackBodyView(viewModel: viewModel)
         }
         .frame(minHeight: 416)

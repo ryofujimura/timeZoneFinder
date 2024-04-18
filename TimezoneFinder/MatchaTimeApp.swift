@@ -9,7 +9,7 @@
 import SwiftUI
 
 @main
-struct TimezoneFinderApp: App {
+struct MatchaTimeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -22,9 +22,8 @@ struct TimezoneFinderApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover!
     var statusBarItem: NSStatusItem!
-    var contentView: ContentView?  // Hold ContentView as an optional
+    var contentView: ContentView?  // Optionally hold ContentView
 
-    
     func applicationDidFinishLaunching(_ notification: Notification) {
         initializePopover()
     }
@@ -36,23 +35,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentSize = NSSize(width: 416, height: 416)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: contentView!)
-        
+
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusBarItem.button {
-            if let image = NSImage(named: "icon") {
-                let targetSize = NSSize(width: 18, height: 18)  // Desired size
-                let newImage = NSImage(size: targetSize, flipped: false) { rect in
-                    image.draw(in: rect)
-                    return true
-                }
-                newImage.isTemplate = true
-                button.image = newImage
-                button.imageScaling = .scaleProportionallyDown
-            }
+            button.image = NSImage(named: "icon")
             button.action = #selector(togglePopover(_:))
+            button.target = self
         }
-
-
     }
 
     @objc func togglePopover(_ sender: AnyObject?) {
@@ -60,18 +49,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if popover.isShown {
                 popover.performClose(sender)
             } else {
-                // Reset the view every time before showing the popover
-                contentView = ContentView()
+                contentView = ContentView()  // Reinstantiate ContentView each time before showing
                 let hostingController = NSHostingController(rootView: contentView!)
                 popover.contentViewController = hostingController
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-                
-                // Make the popover the active and key window
+
                 NSApplication.shared.activate(ignoringOtherApps: true)
                 hostingController.view.window?.makeKey()
             }
         }
     }
-
 }
-

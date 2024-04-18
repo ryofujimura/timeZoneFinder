@@ -16,6 +16,7 @@ struct FrontBodyView: View {
             MatchCardView(viewModel: viewModel, location: "Your Location", timeDifference: 0, emoji: "📍", globalAdjustedTime: $globalAdjustedTime)
                 .id(globalAdjustedTime)
             cityListView
+            Spacer()
 
         }
     }
@@ -25,10 +26,10 @@ struct FrontBodyView: View {
             if viewModel.cityData.isEmpty {
                 HStack(spacing: 3) {
                     Text("Hit")
-                    Image(systemName: "gear")
+                    Image(systemName: "line.3.horizontal")
                     Text("icon at top right to add new cities! :)")
                 }
-                .padding(.vertical, 100)
+                .padding(.vertical, 130)
                 .foregroundColor(.darkGray.opacity(0.4))
                 .font(.system(.caption, design: .rounded).weight(.bold))
             } else {

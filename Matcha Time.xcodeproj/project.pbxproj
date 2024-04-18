@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AF144A2F2BB1FCF60005F6E3 /* TimezoneFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF144A2E2BB1FCF60005F6E3 /* TimezoneFinderApp.swift */; };
+		AF144A2F2BB1FCF60005F6E3 /* MatchaTimeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF144A2E2BB1FCF60005F6E3 /* MatchaTimeApp.swift */; };
 		AF144A312BB1FCF60005F6E3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF144A302BB1FCF60005F6E3 /* ContentView.swift */; };
 		AF144A332BB1FCF80005F6E3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF144A322BB1FCF80005F6E3 /* Assets.xcassets */; };
 		AF144A362BB1FCF80005F6E3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF144A352BB1FCF80005F6E3 /* Preview Assets.xcassets */; };
@@ -19,12 +19,11 @@
 		AF68C35D2BCA59D5008F1665 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C35C2BCA59D5008F1665 /* CitySearchView.swift */; };
 		AF68C35F2BCA5A0E008F1665 /* SearchResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C35E2BCA5A0E008F1665 /* SearchResultView.swift */; };
 		AF68C3612BCA5BF4008F1665 /* FrontBodyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3602BCA5BF4008F1665 /* FrontBodyView.swift */; };
-		AFBFA95B2BD1995C002FD767 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = AFBFA95A2BD1995C002FD767 /* icon.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AF144A2B2BB1FCF60005F6E3 /* MatchaTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MatchaTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF144A2E2BB1FCF60005F6E3 /* TimezoneFinderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimezoneFinderApp.swift; sourceTree = "<group>"; };
+		AF144A2E2BB1FCF60005F6E3 /* MatchaTimeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchaTimeApp.swift; sourceTree = "<group>"; };
 		AF144A302BB1FCF60005F6E3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AF144A322BB1FCF80005F6E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AF144A352BB1FCF80005F6E3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -38,7 +37,6 @@
 		AF68C35E2BCA5A0E008F1665 /* SearchResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultView.swift; sourceTree = "<group>"; };
 		AF68C3602BCA5BF4008F1665 /* FrontBodyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontBodyView.swift; sourceTree = "<group>"; };
 		AF68C3622BCA6656008F1665 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		AFBFA95A2BD1995C002FD767 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,11 +70,10 @@
 			isa = PBXGroup;
 			children = (
 				AF68C3622BCA6656008F1665 /* Info.plist */,
-				AF144A2E2BB1FCF60005F6E3 /* TimezoneFinderApp.swift */,
+				AF144A2E2BB1FCF60005F6E3 /* MatchaTimeApp.swift */,
 				AF68C3562BCA5408008F1665 /* Model */,
 				AF68C3572BCA5416008F1665 /* View */,
 				AF144A322BB1FCF80005F6E3 /* Assets.xcassets */,
-				AFBFA95A2BD1995C002FD767 /* icon.png */,
 				AF144A372BB1FCF80005F6E3 /* TimezoneFinder.entitlements */,
 				AF144A342BB1FCF80005F6E3 /* Preview Content */,
 			);
@@ -165,7 +162,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AF144A262BB1FCF60005F6E3 /* Build configuration list for PBXProject "MatchaTime" */;
+			buildConfigurationList = AF144A262BB1FCF60005F6E3 /* Build configuration list for PBXProject "Matcha Time" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -188,7 +185,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AFBFA95B2BD1995C002FD767 /* icon.png in Resources */,
 				AF144A362BB1FCF80005F6E3 /* Preview Assets.xcassets in Resources */,
 				AF144A332BB1FCF80005F6E3 /* Assets.xcassets in Resources */,
 			);
@@ -210,7 +206,7 @@
 				AF68C34F2BCA3F07008F1665 /* FrontView.swift in Sources */,
 				AF68C3552BCA4A36008F1665 /* ViewModel.swift in Sources */,
 				AF68C35F2BCA5A0E008F1665 /* SearchResultView.swift in Sources */,
-				AF144A2F2BB1FCF60005F6E3 /* TimezoneFinderApp.swift in Sources */,
+				AF144A2F2BB1FCF60005F6E3 /* MatchaTimeApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,7 +353,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = ryofujimura.MatchaTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -388,7 +384,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = ryofujimura.MatchaTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -400,7 +396,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AF144A262BB1FCF60005F6E3 /* Build configuration list for PBXProject "MatchaTime" */ = {
+		AF144A262BB1FCF60005F6E3 /* Build configuration list for PBXProject "Matcha Time" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AF144A382BB1FCF80005F6E3 /* Debug */,

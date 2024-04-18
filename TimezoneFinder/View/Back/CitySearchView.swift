@@ -159,7 +159,7 @@ struct BackBodyView: View {
     var settingsBottomView: some View {
         VStack(spacing: 8) {
             Divider()
-//                .padding(.bottom, 4)
+                .padding(.bottom, 4)
             HStack(spacing: 0) {
                 Text("Settings")
                     .padding(.horizontal, 4)
