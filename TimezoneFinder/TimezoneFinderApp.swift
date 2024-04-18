@@ -39,9 +39,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusBarItem.button {
-            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "Open app")
+            if let image = NSImage(named: "icon") {
+                let targetSize = NSSize(width: 18, height: 18)  // Desired size
+                let newImage = NSImage(size: targetSize, flipped: false) { rect in
+                    image.draw(in: rect)
+                    return true
+                }
+                newImage.isTemplate = true
+                button.image = newImage
+                button.imageScaling = .scaleProportionallyDown
+            }
             button.action = #selector(togglePopover(_:))
         }
+
+
     }
 
     @objc func togglePopover(_ sender: AnyObject?) {

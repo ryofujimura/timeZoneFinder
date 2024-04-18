@@ -15,7 +15,7 @@ struct BackBodyView: View {
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
         "Chicago": "🍕",
-//        "Honolulu": "🌺",
+        "Honolulu": "🌺",
         "Tokyo": "🗼",
         "New York": "🗽",
         "Sydney": "🦘",
@@ -159,7 +159,7 @@ struct BackBodyView: View {
     var settingsBottomView: some View {
         VStack(spacing: 8) {
             Divider()
-                .padding(.bottom, 4)
+//                .padding(.bottom, 4)
             HStack(spacing: 0) {
                 Text("Settings")
                     .padding(.horizontal, 4)
@@ -172,7 +172,38 @@ struct BackBodyView: View {
             HStack(spacing: 4) {
                 Text("About    ")
                     .padding(.horizontal, 4)
-                Text("Designed by [Moyai](https://www.moyaifujimura.com/). Developed by [Ryo](https://github.com/ryofujimura).")
+                HStack(spacing: 0) {
+                    Text("Designed by ")
+                        .foregroundColor(.darkGray)
+                    
+                    Link("Moyai", destination: URL(string: "https://www.moyaifujimura.com/")!)
+                        .foregroundColor(.offblack)
+                    
+                    Text(". Developed by ")
+                        .foregroundColor(.darkGray)
+                    
+                    Link("Ryo", destination: URL(string: "https://github.com/ryofujimura")!)
+                        .foregroundColor(.offblack)
+                    
+                    Text(".")
+                        .foregroundColor(.darkGray)
+                }
+                    .padding(.horizontal, 4)
+                    .fontWeight(.regular)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+            HStack(spacing: 4) {
+                Text("Quit        ")
+                    .padding(.horizontal, 4)
+                HStack(spacing: 0) {
+                    Text("Need to quit?")
+                    Text(" Click here.")
+                        .onTapGesture {
+                            NSApplication.shared.terminate(nil)
+                        }
+                }
+
                     .padding(.horizontal, 4)
                     .fontWeight(.regular)
                 Spacer()

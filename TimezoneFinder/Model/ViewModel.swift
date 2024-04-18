@@ -24,6 +24,9 @@ struct HeaderView: View {
                 .padding(.vertical, 2)
             Spacer()
             iconImage
+                .resizable()  // Allows the image to be resized
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 16, height: 16)
                 .font(.system(size: 16, design: .rounded).weight(.bold))
                 .padding(.trailing, 8)
                 .contentShape(Rectangle())
