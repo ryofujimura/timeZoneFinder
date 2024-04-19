@@ -12,11 +12,12 @@ struct BackBodyView: View {
     @State private var newCity = ""
     @State private var showSuggestions = false
 
+    // Preset emojis for their locations. Will add more if found.
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
         "Chicago": "🍕",
         "Honolulu": "🌺",
-        "Tokyo": "🗼",
+        "Tokyo": "🍵",
         "New York": "🗽",
         "Sydney": "🦘",
         "Rome": "🍝",
@@ -30,6 +31,7 @@ struct BackBodyView: View {
         "Las Vegas": "🎰",
     ]
 
+    // If no preset, will be using random emoji from list
     let randomEmojis = ["🌍", "🌎", "🌏", "🏙️", "🌆", "🌇", "🏞️"]
 
     var cityTimeZones: [String: String] {
@@ -59,6 +61,7 @@ struct BackBodyView: View {
 //        .frame(width: 392+12+12)
     }
 
+    // Search view: Search for city based on macOS time zone city data
     var searchView: some View {
         VStack (spacing:0){
             HStack(spacing: 0) {
@@ -117,7 +120,6 @@ struct BackBodyView: View {
 
     var middleView: some View {
         VStack(spacing: 0) {
-            
             Text("Your List")
                 .font(.system(.caption, design: .rounded).weight(.bold))
                 .foregroundColor(.darkGray)
@@ -125,12 +127,14 @@ struct BackBodyView: View {
                 .padding(.vertical, 8)
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
+                    // Current location
                     HStack {
                         SearchResultView(viewModel: viewModel, emoji: "📍", location: "Your Location", timeDifference: 0)
                         Image(systemName: "lock")
                             .font(.system(size: 12, design: .rounded))
                             .contentShape(Rectangle())
                     }
+                    // Selected City locations
                     ForEach(Array(viewModel.cityData.keys.sorted()), id: \.self) { city in
                         if let cityInfo = viewModel.cityData[city] {
                             HStack {
@@ -200,6 +204,7 @@ struct BackBodyView: View {
                     Text("Need to quit?")
                     Text(" Click here.")
                         .onTapGesture {
+                            // Terminating application
                             NSApplication.shared.terminate(nil)
                         }
                 }
@@ -273,6 +278,7 @@ struct BackBodyView: View {
     }
 }
 
+// Select time format
 struct RadioOptionButton: View {
     let option: String
     @ObservedObject var viewModel: DataModel

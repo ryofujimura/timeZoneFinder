@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// Each individual card of City Card
 struct MatchCardView: View {
 
     @ObservedObject var viewModel : DataModel
@@ -24,6 +25,7 @@ struct MatchCardView: View {
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
+        // Time format 01:00 pm or 13:00
         formatter.dateFormat = viewModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
         formatter.amSymbol = "am"
         formatter.pmSymbol = "pm"
@@ -37,6 +39,7 @@ struct MatchCardView: View {
     
     private var locationDate: String {
         let dateFormatter = DateFormatter()
+        // Date format in April 1, 2024
         dateFormatter.dateFormat = "MMMM d, yyyy"
         let adjustedDate = Calendar.current.date(byAdding: .hour, value: timeDifference + globalAdjustedTime, to: currentTime) ?? Date()
         return dateFormatter.string(from: adjustedDate)
@@ -101,7 +104,6 @@ struct MatchCardView: View {
         .foregroundColor(.offblack)
         .frame(width: 392, height: 84)
         .onAppear {
-            // Set the initial selected hour based on the current time and time difference
             let initialHour = Calendar.current.component(.hour, from: adjustedLocationTime)
             selectedItem = initialHour
         }

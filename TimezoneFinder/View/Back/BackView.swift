@@ -11,6 +11,7 @@ struct BackView: View {
     var flipToFront: () -> Void
     @ObservedObject var viewModel : DataModel
 
+    // BackView: Header and Settings page view
     var body: some View {
         VStack {
             HeaderView(titleText: "Matcha Time", flipTo: flipToFront, iconImage: Image("vector"))

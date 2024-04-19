@@ -13,8 +13,10 @@ struct FrontBodyView: View {
 
     var body: some View {
         VStack (spacing:12) {
+            //Current location Card
             MatchCardView(viewModel: viewModel, location: "Your Location", timeDifference: 0, emoji: "📍", globalAdjustedTime: $globalAdjustedTime)
                 .id(globalAdjustedTime)
+            //Selected location Card(s)
             cityListView
             Spacer()
 
@@ -23,6 +25,7 @@ struct FrontBodyView: View {
     
     private var cityListView: some View {
         Group {
+            // If no cities are selected, show direction to add
             if viewModel.cityData.isEmpty {
                 HStack(spacing: 3) {
                     Text("Hit")
@@ -32,10 +35,13 @@ struct FrontBodyView: View {
                 .padding(.vertical, 130)
                 .foregroundColor(.darkGray.opacity(0.4))
                 .font(.system(.caption, design: .rounded).weight(.bold))
-            } else {
+            }
+            // Selected cities shown as each Card
+            else {
                 VStack(spacing: 12) {
                     ForEach(viewModel.cityData.sorted(by: { $0.value.timeDifference < $1.value.timeDifference }), id: \.key) { city, info in
                         MatchCardView(viewModel: viewModel, location: city, timeDifference: info.timeDifference, emoji: info.emoji, globalAdjustedTime: $globalAdjustedTime)
+                        //Update globalAdjustedTime as globalAdjustedTime is changed on other cards
                             .id(globalAdjustedTime)
                     }
                 }

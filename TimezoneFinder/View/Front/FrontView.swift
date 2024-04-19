@@ -11,10 +11,12 @@ struct FrontView: View {
     var flipToBack: () -> Void
     @ObservedObject var viewModel : DataModel
 
-    
+    //FrontView: Header + Current Location Card + Selected Location
     var body: some View {
         VStack {
             HeaderView(titleText: "Matcha Time", flipTo: flipToBack, iconImage: Image(systemName: "line.3.horizontal"))
+            //ScrollView for more than 5 Cards
+            //V2 will update to limit to 5 Cards
             ScrollView{
                 FrontBodyView(viewModel: viewModel)
 

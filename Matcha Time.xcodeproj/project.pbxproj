@@ -14,7 +14,7 @@
 		AF68C34F2BCA3F07008F1665 /* FrontView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C34E2BCA3F07008F1665 /* FrontView.swift */; };
 		AF68C3512BCA3F10008F1665 /* BackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3502BCA3F10008F1665 /* BackView.swift */; };
 		AF68C3532BCA4799008F1665 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3522BCA4799008F1665 /* DataModel.swift */; };
-		AF68C3552BCA4A36008F1665 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3542BCA4A36008F1665 /* ViewModel.swift */; };
+		AF68C3552BCA4A36008F1665 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3542BCA4A36008F1665 /* HeaderView.swift */; };
 		AF68C3592BCA54E4008F1665 /* MatchCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C3582BCA54E4008F1665 /* MatchCardView.swift */; };
 		AF68C35D2BCA59D5008F1665 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C35C2BCA59D5008F1665 /* CitySearchView.swift */; };
 		AF68C35F2BCA5A0E008F1665 /* SearchResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF68C35E2BCA5A0E008F1665 /* SearchResultView.swift */; };
@@ -31,7 +31,7 @@
 		AF68C34E2BCA3F07008F1665 /* FrontView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontView.swift; sourceTree = "<group>"; };
 		AF68C3502BCA3F10008F1665 /* BackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackView.swift; sourceTree = "<group>"; };
 		AF68C3522BCA4799008F1665 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
-		AF68C3542BCA4A36008F1665 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		AF68C3542BCA4A36008F1665 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		AF68C3582BCA54E4008F1665 /* MatchCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchCardView.swift; sourceTree = "<group>"; };
 		AF68C35C2BCA59D5008F1665 /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		AF68C35E2BCA5A0E008F1665 /* SearchResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultView.swift; sourceTree = "<group>"; };
@@ -92,7 +92,6 @@
 			isa = PBXGroup;
 			children = (
 				AF68C3522BCA4799008F1665 /* DataModel.swift */,
-				AF68C3542BCA4A36008F1665 /* ViewModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -101,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				AF144A302BB1FCF60005F6E3 /* ContentView.swift */,
+				AF68C3542BCA4A36008F1665 /* HeaderView.swift */,
 				AF68C35A2BCA578A008F1665 /* Front */,
 				AF68C35B2BCA578F008F1665 /* Back */,
 			);
@@ -204,7 +204,7 @@
 				AF68C3592BCA54E4008F1665 /* MatchCardView.swift in Sources */,
 				AF68C3512BCA3F10008F1665 /* BackView.swift in Sources */,
 				AF68C34F2BCA3F07008F1665 /* FrontView.swift in Sources */,
-				AF68C3552BCA4A36008F1665 /* ViewModel.swift in Sources */,
+				AF68C3552BCA4A36008F1665 /* HeaderView.swift in Sources */,
 				AF68C35F2BCA5A0E008F1665 /* SearchResultView.swift in Sources */,
 				AF144A2F2BB1FCF60005F6E3 /* MatchaTimeApp.swift in Sources */,
 			);
@@ -340,7 +340,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_ASSET_PATHS = "\"TimezoneFinder/Preview Content\"";
 				DEVELOPMENT_TEAM = LD578K3BS7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -353,7 +353,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.3.5;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = ryofujimura.MatchaTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -371,7 +371,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_ASSET_PATHS = "\"TimezoneFinder/Preview Content\"";
 				DEVELOPMENT_TEAM = LD578K3BS7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -384,7 +384,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.3.5;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = ryofujimura.MatchaTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

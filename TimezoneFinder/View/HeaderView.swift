@@ -12,19 +12,17 @@ struct HeaderView: View {
     var flipTo: () -> Void
     var iconImage: Image
     
+    //HeaderView: Header part of view. Includes Title and button to flip between front view and back view
     var body: some View {
         HStack{
             Text(titleText)
-//                .font(.system(size: 17, weight: .heavy, design: .rounded))
-//                .padding(.horizontal, 4)
-//                .padding(.vertical, 2)
                 .font(.system(.body, design: .rounded).weight(.heavy))
                 .foregroundColor(.offblack)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
             Spacer()
             iconImage
-                .resizable()  // Allows the image to be resized
+                .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 16, height: 16)
                 .font(.system(size: 16, design: .rounded).weight(.bold))
