@@ -156,6 +156,22 @@ class CitySearchViewModel: ObservableObject {
     // Main DataModel reference
     private let dataModel: DataModel
     
+    // Country name mappings for better display
+    let countryNameMappings: [String: String] = [
+        "United States": "USA",
+        "United Kingdom": "UK",
+        "Russian Federation": "Russia",
+        "United Arab Emirates": "UAE",
+        "Korea, Republic of": "South Korea",
+        "Korea, Democratic People's Republic of": "North Korea",
+        "Viet Nam": "Vietnam",
+        "Lao People's Democratic Republic": "Laos",
+        "Hong Kong": "Hong Kong SAR",
+        "Australia": "AUS",
+        "China": "CN",
+        "Japan": "JP"
+    ]
+    
     // Preset emojis for their locations
     let cityEmojis: [String: String] = [
         "Los Angeles": "🌴",
@@ -213,7 +229,10 @@ class CitySearchViewModel: ObservableObject {
         
         let countryCode = tzToCountry[timeZoneIdentifier] ?? ""
         if !countryCode.isEmpty {
-            return Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+            let standardCountryName = Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+            
+            // Apply custom country name mapping if exists
+            return countryNameMappings[standardCountryName] ?? standardCountryName
         }
         return ""
     }
