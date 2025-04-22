@@ -12,7 +12,6 @@ struct SearchResultView: View {
     var emoji: String
     var location: String
     var timeDifference: Int
-    var country: String = "" // Default empty string for "Your Location"
     
     var cityTime: String {
         let formatter = DateFormatter()
@@ -33,11 +32,16 @@ struct SearchResultView: View {
             Text(emoji)
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
-            if !country.isEmpty {
-                Text("\(location), \(country)")
+            
+            // Get the city info to check for country
+            if location != "Your Location", let cityInfo = viewModel.cityData[location] {
+                // Use the country if available
+                let displayName = cityInfo.country.isEmpty ? location : "\(location), \(cityInfo.country)"
+                Text(displayName)
             } else {
                 Text(location)
             }
+            
             Spacer()
             Group {
                 if timeDifference + Calendar.current.component(.hour, from: Date()) > 24 {
