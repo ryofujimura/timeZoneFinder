@@ -45,20 +45,11 @@ struct BackBodyView: View {
         }
         return cityTimeZoneMap
     }
-    
-    // Map city names to their countries based on timezone identifiers
-    var cityCountries: [String: String] {
-        var cityCountryMap: [String: String] = [:]
-        for identifier in TimeZone.knownTimeZoneIdentifiers {
-            let parts = identifier.split(separator: "/")
-            if parts.count > 1 {
-                let city = String(parts.last!).replacingOccurrences(of: "_", with: " ")
-                let country = String(parts.first!)
-                cityCountryMap[city] = country
-            }
-        }
-        return cityCountryMap
-    }
+
+    // Cache timezone to country mapping
+    lazy var tzToCountry: [String: String] = {
+        return DataModel.getTimezoneCountryMapping()
+    }()
 
     var filteredCities: [String] {
         cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
@@ -159,7 +150,7 @@ struct BackBodyView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.darkGray)
                                     .padding(.trailing, 4)
-                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference, country: cityInfo.country)
+                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
                                 Spacer()
                                 Image(systemName: "xmark")
                                     .font(.system(size: 12, design: .rounded))
@@ -246,13 +237,16 @@ struct BackBodyView: View {
         let timeZoneIdentifier = cityTimeZones[city] ?? ""
         let timeZone = TimeZone(identifier: timeZoneIdentifier)
         _ = timeZone?.secondsFromGMT() ?? 0 / 3600
-        let country = cityCountries[city] ?? "Unknown"
+        
+        // Get country for display
+        let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
+        let displayName = countryName.isEmpty ? city : "\(city), \(countryName)"
 
         return HStack(spacing: 8) {
             Text(emoji)
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
-            Text("\(city), \(country)")
+            Text(displayName)
             Spacer()
             Text(cityTime(for: city))
                 .foregroundColor(.offblack)
@@ -260,6 +254,16 @@ struct BackBodyView: View {
         .font(.system(.caption, design: .rounded))
         .frame(height: 17)
         .cornerRadius(20)
+    }
+
+    func getCountryNameForCity(city: String, timeZoneIdentifier: String) -> String {
+        guard !timeZoneIdentifier.isEmpty else { return "" }
+        
+        let countryCode = tzToCountry[timeZoneIdentifier] ?? ""
+        if !countryCode.isEmpty {
+            return Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+        }
+        return ""
     }
 
     func addCity(city: String) {
@@ -273,9 +277,13 @@ struct BackBodyView: View {
             let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
 
             let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
-            let country = cityCountries[city] ?? "Unknown"
+            
+            // Get country information
+            let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
 
-            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: country)
+            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName)
+            
+            // Use original city name as the key but include country in the displayed name
             viewModel.addCity(city: city, info: cityInfo)
 
             newCity = ""
