@@ -107,3 +107,43 @@ extension Color {
     static let lightGray = Color(red: 245/256, green: 245/256, blue: 245/256)
     static let offwhite = Color(red: 255/256, green: 255/256, blue: 255/256)
 }
+
+// Timezone to country mapping function
+extension DataModel {
+    static func getTimezoneCountryMapping() -> [String: String] {
+        var tzToCountry: [String: String] = [:]
+        
+        guard let zoneTabPath = Bundle.main.path(forResource: "zone.tab", ofType: nil),
+              let raw = try? String(contentsOfFile: zoneTabPath) else {
+            // Fallback to system path if not found in bundle
+            let systemZoneTabPath = "/usr/share/zoneinfo/zone.tab"
+            guard let raw = try? String(contentsOfFile: systemZoneTabPath) else {
+                return tzToCountry
+            }
+            
+            for line in raw.split(separator: "\n") {
+                guard !line.hasPrefix("#"),
+                      let firstTab = line.firstIndex(of: "\t") else { continue }
+                let countryCode = String(line[..<firstTab])
+                let rest = line[line.index(after: firstTab)...]
+                guard rest.split(separator: "\t").count > 1 else { continue }
+                let zoneName = rest.split(separator: "\t")[1]
+                tzToCountry[String(zoneName)] = countryCode
+            }
+            
+            return tzToCountry
+        }
+        
+        for line in raw.split(separator: "\n") {
+            guard !line.hasPrefix("#"),
+                  let firstTab = line.firstIndex(of: "\t") else { continue }
+            let countryCode = String(line[..<firstTab])
+            let rest = line[line.index(after: firstTab)...]
+            guard rest.split(separator: "\t").count > 1 else { continue }
+            let zoneName = rest.split(separator: "\t")[1]
+            tzToCountry[String(zoneName)] = countryCode
+        }
+        
+        return tzToCountry
+    }
+}
