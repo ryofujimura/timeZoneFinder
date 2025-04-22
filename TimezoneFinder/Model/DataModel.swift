@@ -64,7 +64,8 @@ class DataModel: ObservableObject {
     func loadCityOrder() {
         // Load city order from UserDefaults
         if let savedOrder = UserDefaults.standard.array(forKey: "cityOrder") as? [String] {
-            cityOrder = savedOrder
+            // Filter out any cities that aren't in cityData anymore
+            cityOrder = savedOrder.filter { cityData[$0] != nil }
         } else {
             // If no saved order, initialize with current city keys
             cityOrder = Array(cityData.keys)
