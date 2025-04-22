@@ -295,7 +295,7 @@ struct BackBodyView: View {
                     Text(". Developed by ")
                         .foregroundColor(.darkGray)
                     
-                    Link("Ryo", destination: URL(string: "https://github.com/ryofujimura")!)
+                    Link("Ryo", destination: URL(string: "https://ryofujimura.github.io/")!)
                         .foregroundColor(.offblack)
                     
                     Text(".")
