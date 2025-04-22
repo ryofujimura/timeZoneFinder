@@ -19,7 +19,6 @@ struct MatchCardView: View {
     var location: String
     var timeDifference: Int
     var emoji: String
-    var country: String = "" // Default empty string for "Your Location"
     
     @State var hour: Int = Calendar.current.component(.hour, from: Date())
     @Binding var globalAdjustedTime: Int
@@ -85,13 +84,8 @@ struct MatchCardView: View {
                         .font(.system(.caption, design: .rounded).weight(.bold))
                         .kerning(0.8)
                         HStack (spacing: 0) {
-                            if !country.isEmpty {
-                                Text("\(location), \(country)")
-                                    .padding(.vertical, 1.5)
-                            } else {
-                                Text(location)
-                                    .padding(.vertical, 1.5)
-                            }
+                            Text(location)
+                                .padding(.vertical, 1.5)
                             Spacer()
                             Text(dateFormatter.string(from: adjustedLocationTime))
                         }
