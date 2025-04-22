@@ -147,3 +147,124 @@ extension DataModel {
         return tzToCountry
     }
 }
+
+// MARK: - CitySearchViewModel
+class CitySearchViewModel: ObservableObject {
+    @Published var newCity = ""
+    @Published var showSuggestions = false
+    
+    // Main DataModel reference
+    private let dataModel: DataModel
+    
+    // Preset emojis for their locations
+    let cityEmojis: [String: String] = [
+        "Los Angeles": "🌴",
+        "Chicago": "🍕",
+        "Honolulu": "🌺",
+        "Tokyo": "🍵",
+        "New York": "🗽",
+        "Sydney": "🦘",
+        "Rome": "🍝",
+        "London": "🎡",
+        "San Francisco": "🌉",
+        "Seattle": "☕",
+        "Amsterdam": "🚲",
+        "Beijing": "🐉",
+        "Athens": "🏛️",
+        "Mexico City": "🌮",
+        "Las Vegas": "🎰",
+    ]
+    
+    // If no preset, will be using random emoji from list
+    let randomEmojis = ["🌍", "🌎", "🌏", "🏙️", "🌆", "🌇", "🏞️"]
+    
+    // Cache timezone to country mapping
+    lazy var tzToCountry: [String: String] = {
+        return DataModel.getTimezoneCountryMapping()
+    }()
+    
+    init(dataModel: DataModel) {
+        self.dataModel = dataModel
+    }
+    
+    var cityTimeZones: [String: String] {
+        var cityTimeZoneMap: [String: String] = [:]
+        for identifier in TimeZone.knownTimeZoneIdentifiers {
+            let parts = identifier.split(separator: "/")
+            if parts.count > 1 {
+                let city = parts.last!.replacingOccurrences(of: "_", with: " ")
+                cityTimeZoneMap[city] = identifier
+            }
+        }
+        return cityTimeZoneMap
+    }
+    
+    var filteredCities: [String] {
+        cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
+    }
+    
+    func clearSearch() {
+        newCity = ""
+        showSuggestions = false
+    }
+    
+    func getCountryNameForCity(city: String, timeZoneIdentifier: String) -> String {
+        guard !timeZoneIdentifier.isEmpty else { return "" }
+        
+        let countryCode = tzToCountry[timeZoneIdentifier] ?? ""
+        if !countryCode.isEmpty {
+            return Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+        }
+        return ""
+    }
+    
+    func displayNameForCity(city: String) -> String {
+        if let identifier = cityTimeZones[city] {
+            let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: identifier)
+            return countryName.isEmpty ? city : "\(city), \(countryName)"
+        }
+        return city
+    }
+    
+    func addCity(city: String) {
+        if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
+            let localTimeZone = TimeZone.current
+            let localTime = Date()
+            
+            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
+            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
+            
+            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
+            
+            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+            
+            // Get country information
+            let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
+            
+            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName)
+            
+            // Use original city name as the key but include country in the displayed name
+            dataModel.addCity(city: city, info: cityInfo)
+            
+            clearSearch()
+        }
+    }
+    
+    func deleteSelectedCity(city: String) {
+        dataModel.removeCity(city: city)
+    }
+    
+    func cityTime(for city: String) -> String {
+        guard let timeZoneIdentifier = cityTimeZones[city],
+              let timeZone = TimeZone(identifier: timeZoneIdentifier) else {
+            return "Error"
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = dataModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.amSymbol = "am"
+        formatter.pmSymbol = "pm"
+        formatter.timeZone = timeZone
+        return formatter.string(from: Date())
+    }
+}

@@ -8,51 +8,13 @@
 import SwiftUI
 
 struct BackBodyView: View {
-    @ObservedObject var viewModel : DataModel
-    @State private var newCity = ""
-    @State private var showSuggestions = false
-
-    // Preset emojis for their locations. Will add more if found.
-    let cityEmojis: [String: String] = [
-        "Los Angeles": "🌴",
-        "Chicago": "🍕",
-        "Honolulu": "🌺",
-        "Tokyo": "🍵",
-        "New York": "🗽",
-        "Sydney": "🦘",
-        "Rome": "🍝",
-        "London": "🎡",
-        "San Francisco": "🌉",
-        "Seattle": "☕",
-        "Amsterdam": "🚲",
-        "Beijing": "🐉",
-        "Athens": "🏛️",
-        "Mexico City": "🌮",
-        "Las Vegas": "🎰",
-    ]
-
-    // If no preset, will be using random emoji from list
-    let randomEmojis = ["🌍", "🌎", "🌏", "🏙️", "🌆", "🌇", "🏞️"]
-
-    var cityTimeZones: [String: String] {
-        var cityTimeZoneMap: [String: String] = [:]
-        for identifier in TimeZone.knownTimeZoneIdentifiers {
-            let parts = identifier.split(separator: "/")
-            if parts.count > 1 {
-                let city = parts.last!.replacingOccurrences(of: "_", with: " ")
-                cityTimeZoneMap[city] = identifier
-            }
-        }
-        return cityTimeZoneMap
-    }
-
-    // Cache timezone to country mapping
-    lazy var tzToCountry: [String: String] = {
-        return DataModel.getTimezoneCountryMapping()
-    }()
-
-    var filteredCities: [String] {
-        cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
+    @ObservedObject var viewModel: DataModel
+    @StateObject private var citySearchVM: CitySearchViewModel
+    
+    init(viewModel: DataModel) {
+        self.viewModel = viewModel
+        // Create StateObject through _citySearchVM to avoid compiler error
+        _citySearchVM = StateObject(wrappedValue: CitySearchViewModel(dataModel: viewModel))
     }
 
     var body: some View {
@@ -62,27 +24,24 @@ struct BackBodyView: View {
             Spacer()
             settingsBottomView
         }
-//        .padding(.horizontal, 12)
-//        .frame(width: 392+12+12)
     }
 
     // Search view: Search for city based on macOS time zone city data
     var searchView: some View {
-        VStack (spacing:0){
+        VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(showSuggestions ? .black : .gray)
-                TextField("Search for a city", text: $newCity)
+                    .foregroundColor(citySearchVM.showSuggestions ? .black : .gray)
+                TextField("Search for a city", text: $citySearchVM.newCity)
                     .padding(.leading, 8)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .foregroundColor(showSuggestions ? .black : .gray)
-                    .onChange(of: newCity) {
-                        showSuggestions = !newCity.isEmpty
+                    .foregroundColor(citySearchVM.showSuggestions ? .black : .gray)
+                    .onChange(of: citySearchVM.newCity) {
+                        citySearchVM.showSuggestions = !citySearchVM.newCity.isEmpty
                     }
-                if !newCity.isEmpty {
+                if !citySearchVM.newCity.isEmpty {
                     Button(action: {
-                        newCity = ""
-                        showSuggestions = false
+                        citySearchVM.clearSearch()
                     }) {
                         Text("Cancel")
                     }
@@ -92,25 +51,24 @@ struct BackBodyView: View {
             }
             .padding(.vertical, 8)
             .padding(.leading, 8)
-//            .padding(8)
             .font(.system(.caption, design: .rounded).weight(.regular))
             .foregroundColor(.gray)
             .background(Color.white)
-//            .cornerRadius(8)
-            if showSuggestions {
-                if filteredCities.isEmpty {
+            
+            if citySearchVM.showSuggestions {
+                if citySearchVM.filteredCities.isEmpty {
                     Text("Oops. Looks like there's a typo :/")
                         .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.4))
                         .font(.system(.caption, design: .rounded).weight(.bold))
                         .frame(height: 110)
                 } else {
                     ScrollView(showsIndicators: false) {
-                        ForEach(filteredCities, id: \.self) { city in
+                        ForEach(citySearchVM.filteredCities, id: \.self) { city in
                             suggestionView(for: city)
                                 .contentShape(Rectangle())
                                 .cornerRadius(25)
                                 .onTapGesture {
-                                    addCity(city: city)
+                                    citySearchVM.addCity(city: city)
                                 }
                         }
                     }
@@ -156,7 +114,7 @@ struct BackBodyView: View {
                                     .font(.system(size: 12, design: .rounded))
                                     .contentShape(Rectangle())
                                     .onTapGesture {
-                                        deleteSelectedCity(city: city)
+                                        citySearchVM.deleteSelectedCity(city: city)
                                     }
                             }
                         }
@@ -233,14 +191,8 @@ struct BackBodyView: View {
     }
 
     func suggestionView(for city: String) -> some View {
-        let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
-        let timeZoneIdentifier = cityTimeZones[city] ?? ""
-        let timeZone = TimeZone(identifier: timeZoneIdentifier)
-        _ = timeZone?.secondsFromGMT() ?? 0 / 3600
-        
-        // Get country for display
-        let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
-        let displayName = countryName.isEmpty ? city : "\(city), \(countryName)"
+        let emoji = citySearchVM.cityEmojis[city] ?? citySearchVM.randomEmojis.randomElement() ?? "🌍"
+        let displayName = citySearchVM.displayNameForCity(city: city)
 
         return HStack(spacing: 8) {
             Text(emoji)
@@ -248,65 +200,12 @@ struct BackBodyView: View {
                 .opacity(0.8)
             Text(displayName)
             Spacer()
-            Text(cityTime(for: city))
+            Text(citySearchVM.cityTime(for: city))
                 .foregroundColor(.offblack)
         }
         .font(.system(.caption, design: .rounded))
         .frame(height: 17)
         .cornerRadius(20)
-    }
-
-    func getCountryNameForCity(city: String, timeZoneIdentifier: String) -> String {
-        guard !timeZoneIdentifier.isEmpty else { return "" }
-        
-        let countryCode = tzToCountry[timeZoneIdentifier] ?? ""
-        if !countryCode.isEmpty {
-            return Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
-        }
-        return ""
-    }
-
-    func addCity(city: String) {
-        if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
-            let localTimeZone = TimeZone.current
-            let localTime = Date()
-
-            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
-            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
-
-            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
-
-            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
-            
-            // Get country information
-            let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
-
-            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName)
-            
-            // Use original city name as the key but include country in the displayed name
-            viewModel.addCity(city: city, info: cityInfo)
-
-            newCity = ""
-            showSuggestions = false
-        }
-    }
-
-    func deleteSelectedCity(city: String) {
-        viewModel.removeCity(city: city)
-    }
-
-    func cityTime(for city: String) -> String {
-        guard let timeZoneIdentifier = cityTimeZones[city],
-              let timeZone = TimeZone(identifier: timeZoneIdentifier) else {
-            return "Error"
-        }
-        let formatter = DateFormatter()
-        formatter.dateFormat = viewModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.amSymbol = "am"
-        formatter.pmSymbol = "pm"
-        formatter.timeZone = timeZone
-        return formatter.string(from: Date())
     }
 }
 
@@ -336,7 +235,6 @@ struct CityTimeZone: Identifiable {
     var city: String
     var timeZoneIdentifier: String
 }
-
 
 #Preview {
     BackBodyView(viewModel: DataModel())
