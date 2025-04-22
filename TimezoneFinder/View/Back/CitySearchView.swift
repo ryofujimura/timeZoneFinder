@@ -6,10 +6,15 @@
 //
 
 import SwiftUI
+import AppKit
 
 struct BackBodyView: View {
     @ObservedObject var viewModel: DataModel
     @StateObject private var citySearchVM: CitySearchViewModel
+    
+    // Added state variables for keyboard navigation
+    @State private var selectedCityIndex: Int = 0
+    @FocusState private var isTextFieldFocused: Bool
     
     init(viewModel: DataModel) {
         self.viewModel = viewModel
@@ -24,6 +29,14 @@ struct BackBodyView: View {
             Spacer()
             settingsBottomView
         }
+        // Add keyboard event handler for navigation
+        .onKeyPress { press in
+            handleKeyPress(press)
+        }
+        .onAppear {
+            // Set focus to the text field when the view appears
+            isTextFieldFocused = true
+        }
     }
 
     // Search view: Search for city based on macOS time zone city data
@@ -36,8 +49,11 @@ struct BackBodyView: View {
                     .padding(.leading, 8)
                     .textFieldStyle(PlainTextFieldStyle())
                     .foregroundColor(citySearchVM.showSuggestions ? .black : .gray)
+                    .focused($isTextFieldFocused)
                     .onChange(of: citySearchVM.newCity) {
                         citySearchVM.showSuggestions = !citySearchVM.newCity.isEmpty
+                        // Reset selection index when search query changes
+                        selectedCityIndex = 0
                     }
                 if !citySearchVM.newCity.isEmpty {
                     Button(action: {
@@ -63,13 +79,27 @@ struct BackBodyView: View {
                         .frame(height: 110)
                 } else {
                     ScrollView(showsIndicators: false) {
-                        ForEach(citySearchVM.filteredCities, id: \.self) { city in
-                            suggestionView(for: city)
-                                .contentShape(Rectangle())
-                                .cornerRadius(25)
-                                .onTapGesture {
-                                    citySearchVM.addCity(city: city)
+                        ScrollViewReader { scrollProxy in
+                            VStack(spacing: 0) {
+                                ForEach(Array(citySearchVM.filteredCities.enumerated()), id: \.element) { index, city in
+                                    suggestionView(for: city)
+                                        .id(index) // Add ID for ScrollViewReader
+                                        .contentShape(Rectangle())
+                                        .cornerRadius(25)
+                                        .background(selectedCityIndex == index ? Color.lightGray : Color.clear)
+                                        .cornerRadius(8)
+                                        .padding(.vertical, 2)
+                                        .onTapGesture {
+                                            citySearchVM.addCity(city: city)
+                                        }
                                 }
+                            }
+                            .onChange(of: selectedCityIndex) { newIndex in
+                                // Scroll to show the selected item when selection changes
+                                withAnimation {
+                                    scrollProxy.scrollTo(newIndex, anchor: .center)
+                                }
+                            }
                         }
                     }
                     .frame(maxHeight: 110)
@@ -79,6 +109,57 @@ struct BackBodyView: View {
         }
         .background(Color.white)
         .cornerRadius(8)
+    }
+
+    // Handle keyboard events
+    @ViewBuilder
+    func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
+        // Only handle keys when suggestions are visible
+        guard citySearchVM.showSuggestions && !citySearchVM.filteredCities.isEmpty else {
+            return .ignored
+        }
+        
+        switch press.key {
+        case .downArrow, .tab:
+            if selectedCityIndex < citySearchVM.filteredCities.count - 1 {
+                selectedCityIndex += 1
+            } else {
+                // Cycle back to the first item when at the end
+                selectedCityIndex = 0
+            }
+            return .handled
+            
+        case .upArrow, .tab where press.modifiers.contains(.shift):
+            if selectedCityIndex > 0 {
+                selectedCityIndex -= 1
+            } else {
+                // Cycle to the last item when at the beginning
+                selectedCityIndex = citySearchVM.filteredCities.count - 1
+            }
+            return .handled
+            
+        case .return:
+            if selectedCityIndex >= 0 && selectedCityIndex < citySearchVM.filteredCities.count {
+                let selectedCity = citySearchVM.filteredCities[selectedCityIndex]
+                
+                // Add haptic feedback if available
+                #if os(macOS)
+                NSHapticFeedbackManager.defaultPerformer.performFeedback(.generic, performanceTime: .default)
+                #endif
+                
+                // Visual flash effect
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    // This will be triggered before adding the city
+                    // which clears the suggestions
+                }
+                
+                citySearchVM.addCity(city: selectedCity)
+            }
+            return .handled
+            
+        default:
+            return .ignored
+        }
     }
 
     var middleView: some View {
