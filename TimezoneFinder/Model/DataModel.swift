@@ -8,17 +8,6 @@
 import Foundation
 import SwiftUI
 
-// Add Identifiable conformance for ForEach and Codable for saving/loading
-struct UserCity: Codable, Identifiable {
-    var id: String // City name used as ID
-    var info: CityInfo
-}
-
-struct CityInfo: Codable {
-    var timeDifference: Int
-    var emoji: String
-}
-
 class DataModel: ObservableObject {
     @Published var timeFormat: String = "12hr" {
         didSet {
@@ -26,49 +15,39 @@ class DataModel: ObservableObject {
             UserDefaults.standard.set(timeFormat, forKey: "timeFormat")
         }
     }
-    // Replace the dictionary with an array of UserCity
-    @Published var userCities: [UserCity] = [] {
+    @Published var cityData: [String: CityInfo] = [:] {
         didSet {
-            // Saves the user cities data to UserDefaults when it is updated
-            saveUserCities()
+            // Saves the city data to UserDefaults when it is updated
+            saveCityData()
+        }
+    }
+    
+    @Published var cityOrder: [String] = [] {
+        didSet {
+            // Save city order to UserDefaults when it changes
+            saveCityOrder()
         }
     }
 
     init() {
-        // Loads user cities and time format from UserDefaults during initialization
-        loadUserCities() // Renamed function
+        // Loads city data and time format from UserDefaults during initialization
+        loadCityData()
         loadTimeFormat()
+        loadCityOrder()
     }
 
-    // Renamed function to save the array
-    func saveUserCities() {
-        // Encodes and saves userCities to UserDefaults
-        if let encoded = try? JSONEncoder().encode(userCities) {
-            UserDefaults.standard.set(encoded, forKey: "userCities") // Use new key
+    func saveCityData() {
+        // Encodes and saves cityData to UserDefaults
+        if let encoded = try? JSONEncoder().encode(cityData) {
+            UserDefaults.standard.set(encoded, forKey: "cityData")
         }
     }
 
-    // Renamed function to load the array
-    func loadUserCities() {
-        // Try loading the new array format first
-        if let savedData = UserDefaults.standard.data(forKey: "userCities"), // Use new key
-           let decodedData = try? JSONDecoder().decode([UserCity].self, from: savedData) {
-            userCities = decodedData
-            return // Successfully loaded new format, exit
-        }
-
-        // If new format not found, try migrating from the old dictionary format
-        if let oldSavedData = UserDefaults.standard.data(forKey: "cityData"), // Check old key
-           let decodedOldData = try? JSONDecoder().decode([String: CityInfo].self, from: oldSavedData) {
-            // Convert dictionary to array - maintaining dictionary order isn't guaranteed,
-            // but it's the best we can do for migration. New items will be ordered.
-            userCities = decodedOldData.map { UserCity(id: $0.key, info: $0.value) }
-                                      // Consider sorting alphabetically for a consistent initial migration order
-                                      .sorted { $0.id < $1.id }
-
-            saveUserCities() // Save the migrated data in the new format
-            UserDefaults.standard.removeObject(forKey: "cityData") // Remove the old data
-            print("Migrated old cityData format to new userCities format.")
+    func loadCityData() {
+        // Loads and decodes city data from UserDefaults
+        if let savedData = UserDefaults.standard.data(forKey: "cityData"),
+           let decodedData = try? JSONDecoder().decode([String: CityInfo].self, from: savedData) {
+            cityData = decodedData
         }
     }
 
@@ -76,6 +55,47 @@ class DataModel: ObservableObject {
         // Loads the time format setting from UserDefaults, defaulting to "12hr" if not found
         timeFormat = UserDefaults.standard.string(forKey: "timeFormat") ?? "12hr"
     }
+
+    func saveCityOrder() {
+        // Encode and save cityOrder to UserDefaults
+        UserDefaults.standard.set(cityOrder, forKey: "cityOrder")
+    }
+    
+    func loadCityOrder() {
+        // Load city order from UserDefaults
+        if let savedOrder = UserDefaults.standard.array(forKey: "cityOrder") as? [String] {
+            cityOrder = savedOrder
+        } else {
+            // If no saved order, initialize with current city keys
+            cityOrder = Array(cityData.keys)
+        }
+    }
+    
+    // Add a city and update the order
+    func addCity(city: String, info: CityInfo) {
+        cityData[city] = info
+        if !cityOrder.contains(city) {
+            cityOrder.append(city)
+        }
+    }
+    
+    // Remove a city and update the order
+    func removeCity(city: String) {
+        cityData.removeValue(forKey: city)
+        if let index = cityOrder.firstIndex(of: city) {
+            cityOrder.remove(at: index)
+        }
+    }
+    
+    // Move a city to a new position in the order
+    func moveCity(from: IndexSet, to: Int) {
+        cityOrder.move(fromOffsets: from, toOffset: to)
+    }
+}
+
+struct CityInfo: Codable {
+    var timeDifference: Int
+    var emoji: String
 }
 
 //Global colors

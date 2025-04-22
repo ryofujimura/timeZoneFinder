@@ -94,7 +94,7 @@ struct BackBodyView: View {
 //            .cornerRadius(8)
             if showSuggestions {
                 if filteredCities.isEmpty {
-                    Text("Oops. Looks like there’s a typo :/")
+                    Text("Oops. Looks like there's a typo :/")
                         .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.4))
                         .font(.system(.caption, design: .rounded).weight(.bold))
                         .frame(height: 110)
@@ -134,31 +134,33 @@ struct BackBodyView: View {
                             .font(.system(size: 12, design: .rounded))
                             .contentShape(Rectangle())
                     }
-                    // Selected City locations
-                    // Iterate directly over the array of CityEntry
-                    ForEach(viewModel.cityData) { entry in
-                        // No need to check for nil, entry is guaranteed
-                        HStack {
-                            // Access properties from the entry object
-                            SearchResultView(viewModel: viewModel, emoji: entry.info.emoji, location: entry.name, timeDifference: entry.info.timeDifference)
-                            Spacer()
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, design: .rounded))
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    // Pass the entry's name to the delete function
-                                    deleteSelectedCity(cityName: entry.name)
+                    
+                    // City list with drag and drop functionality
+                    List {
+                        ForEach(viewModel.cityOrder, id: \.self) { city in
+                            if let cityInfo = viewModel.cityData[city] {
+                                HStack {
+                                    SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                                    Spacer()
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 12, design: .rounded))
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            deleteSelectedCity(city: city)
+                                        }
                                 }
+                            }
                         }
+                        .onMove(perform: viewModel.moveCity)
                     }
+                    .listStyle(PlainListStyle())
+                    .environment(\.defaultMinListRowHeight, 30)
                 }
                 .padding(.bottom, 8)
             }
             .frame(minHeight: 110)
         }
         .padding(8)
-//        .padding(.horizontal, 8)
-//        .background(Color.white)
         .cornerRadius(8)
     }
 
@@ -243,43 +245,27 @@ struct BackBodyView: View {
     }
 
     func addCity(city: String) {
-        // Check if the city already exists in the list
-        if !viewModel.cityData.contains(where: { $0.name == city }) {
-            if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
-                let localTimeZone = TimeZone.current
-                let localTime = Date()
+        if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
+            let localTimeZone = TimeZone.current
+            let localTime = Date()
 
-                let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
-                let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
+            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
+            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
 
-                let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
+            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
 
-                let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
 
-                // Create a CityEntry object
-                let newEntry = CityEntry(name: city, info: CityInfo(timeDifference: timeDifference, emoji: emoji))
-                // Append the new entry to the array
-                viewModel.cityData.append(newEntry)
+            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji)
+            viewModel.addCity(city: city, info: cityInfo)
 
-                newCity = ""
-                showSuggestions = false
-            }
-        } else {
-            // Optionally handle the case where the city already exists (e.g., show an alert)
-            print("City \(city) already exists.")
-            // Clear search field even if city exists
             newCity = ""
             showSuggestions = false
         }
     }
 
-    // Updated function to accept cityName
-    func deleteSelectedCity(cityName: String) {
-        // Find the index of the city entry with the matching name
-        if let index = viewModel.cityData.firstIndex(where: { $0.name == cityName }) {
-            // Remove the entry at that index
-            viewModel.cityData.remove(at: index)
-        }
+    func deleteSelectedCity(city: String) {
+        viewModel.removeCity(city: city)
     }
 
     func cityTime(for city: String) -> String {
