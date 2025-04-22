@@ -50,8 +50,8 @@ struct BackBodyView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                     .foregroundColor(citySearchVM.showSuggestions ? .black : .gray)
                     .focused($isTextFieldFocused)
-                    .onChange(of: citySearchVM.newCity) {
-                        citySearchVM.showSuggestions = !citySearchVM.newCity.isEmpty
+                    .onChange(of: citySearchVM.newCity) { oldValue, newValue in
+                        citySearchVM.showSuggestions = !newValue.isEmpty
                         // Reset selection index when search query changes
                         selectedCityIndex = 0
                     }
@@ -94,10 +94,10 @@ struct BackBodyView: View {
                                         }
                                 }
                             }
-                            .onChange(of: selectedCityIndex) { newIndex in
+                            .onChange(of: selectedCityIndex) { oldValue, newValue in
                                 // Scroll to show the selected item when selection changes
                                 withAnimation {
-                                    scrollProxy.scrollTo(newIndex, anchor: .center)
+                                    scrollProxy.scrollTo(newValue, anchor: .center)
                                 }
                             }
                         }
@@ -112,7 +112,6 @@ struct BackBodyView: View {
     }
 
     // Handle keyboard events
-    @ViewBuilder
     func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
         // Only handle keys when suggestions are visible
         guard citySearchVM.showSuggestions && !citySearchVM.filteredCities.isEmpty else {
@@ -120,7 +119,7 @@ struct BackBodyView: View {
         }
         
         switch press.key {
-        case .downArrow, .tab:
+        case .downArrow:
             if selectedCityIndex < citySearchVM.filteredCities.count - 1 {
                 selectedCityIndex += 1
             } else {
@@ -129,7 +128,25 @@ struct BackBodyView: View {
             }
             return .handled
             
-        case .upArrow, .tab where press.modifiers.contains(.shift):
+        case .tab:
+            if selectedCityIndex < citySearchVM.filteredCities.count - 1 {
+                selectedCityIndex += 1
+            } else {
+                // Cycle back to the first item when at the end
+                selectedCityIndex = 0
+            }
+            return .handled
+            
+        case .upArrow:
+            if selectedCityIndex > 0 {
+                selectedCityIndex -= 1
+            } else {
+                // Cycle to the last item when at the beginning
+                selectedCityIndex = citySearchVM.filteredCities.count - 1
+            }
+            return .handled
+            
+        case .tab where press.modifiers.contains(.shift):
             if selectedCityIndex > 0 {
                 selectedCityIndex -= 1
             } else {
@@ -144,7 +161,7 @@ struct BackBodyView: View {
                 
                 // Add haptic feedback if available
                 #if os(macOS)
-                NSHapticFeedbackManager.defaultPerformer.perform(.genericSelection, performanceTime: .default)
+                NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .default)
                 #endif
                 
                 // Visual flash effect
