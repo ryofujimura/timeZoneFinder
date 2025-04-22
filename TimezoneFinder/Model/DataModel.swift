@@ -74,23 +74,29 @@ class DataModel: ObservableObject {
     
     // Add a city and update the order
     func addCity(city: String, info: CityInfo) {
-        cityData[city] = info
-        if !cityOrder.contains(city) {
-            cityOrder.append(city)
+        DispatchQueue.main.async {
+            self.cityData[city] = info
+            if !self.cityOrder.contains(city) {
+                self.cityOrder.append(city)
+            }
         }
     }
     
     // Remove a city and update the order
     func removeCity(city: String) {
-        cityData.removeValue(forKey: city)
-        if let index = cityOrder.firstIndex(of: city) {
-            cityOrder.remove(at: index)
+        DispatchQueue.main.async {
+            self.cityData.removeValue(forKey: city)
+            if let index = self.cityOrder.firstIndex(of: city) {
+                self.cityOrder.remove(at: index)
+            }
         }
     }
     
     // Move a city to a new position in the order
     func moveCity(from: IndexSet, to: Int) {
-        cityOrder.move(fromOffsets: from, toOffset: to)
+        DispatchQueue.main.async {
+            self.cityOrder.move(fromOffsets: from, toOffset: to)
+        }
     }
 }
 
@@ -213,8 +219,10 @@ class CitySearchViewModel: ObservableObject {
     }
     
     func clearSearch() {
-        newCity = ""
-        showSuggestions = false
+        DispatchQueue.main.async {
+            self.newCity = ""
+            self.showSuggestions = false
+        }
     }
     
     func getCountryNameForCity(city: String, timeZoneIdentifier: String) -> String {
