@@ -80,26 +80,31 @@ struct BackBodyView: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                     
-                    ForEach(citySearchVM.searchHistoryVM.searchHistory, id: \.self) { term in
-                        Button(action: {
-                            citySearchVM.useHistoryItem(term)
-                        }) {
-                            HStack {
-                                Image(systemName: "clock.arrow.circlepath")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.darkGray)
-                                Text(term)
-                                    .font(.system(.caption, design: .rounded))
-                                    .fontWeight(.regular)
-                                    .foregroundColor(.darkGray)
-                                Spacer()
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(citySearchVM.searchHistoryVM.searchHistory, id: \.self) { term in
+                                Button(action: {
+                                    citySearchVM.useHistoryItem(term)
+                                }) {
+                                    HStack {
+                                        Image(systemName: "clock.arrow.circlepath")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.darkGray)
+                                        Text(term)
+                                            .font(.system(.caption, design: .rounded))
+                                            .fontWeight(.regular)
+                                            .foregroundColor(.darkGray)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 6)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
+                    .frame(height: 64) // Height for approximately 2 items
                 }
                 .background(Color.white)
                 .cornerRadius(8)

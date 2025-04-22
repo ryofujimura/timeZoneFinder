@@ -14,7 +14,7 @@ class SearchHistoryViewModel: ObservableObject {
     @Published var searchHistory: [String] = []
     
     // Constant for maximum history items to keep
-    private let maxHistoryItems = 3
+    private let maxHistoryItems = 10
     
     init() {
         // Load search history from UserDefaults
