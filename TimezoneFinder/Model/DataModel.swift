@@ -159,6 +159,9 @@ class CitySearchViewModel: ObservableObject {
     @Published var newCity = ""
     @Published var showSuggestions = false
     
+    // Search history view model
+    @ObservedObject var searchHistoryVM = SearchHistoryViewModel()
+    
     // Main DataModel reference
     private let dataModel: DataModel
     
@@ -266,6 +269,9 @@ class CitySearchViewModel: ObservableObject {
             // Use original city name as the key but include country in the displayed name
             dataModel.addCity(city: city, info: cityInfo)
             
+            // Add the search term to search history
+            searchHistoryVM.addSearchTerm(newCity)
+            
             clearSearch()
         }
     }
@@ -286,5 +292,10 @@ class CitySearchViewModel: ObservableObject {
         formatter.pmSymbol = "pm"
         formatter.timeZone = timeZone
         return formatter.string(from: Date())
+    }
+    
+    func useHistoryItem(_ term: String) {
+        newCity = term
+        showSuggestions = !term.isEmpty
     }
 }

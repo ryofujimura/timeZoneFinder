@@ -71,6 +71,40 @@ struct BackBodyView: View {
             .foregroundColor(.gray)
             .background(Color.white)
             
+            // Display search history when the text field is focused and empty
+            if isTextFieldFocused && citySearchVM.newCity.isEmpty && !citySearchVM.searchHistoryVM.searchHistory.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Recent Searches")
+                        .font(.system(.caption, design: .rounded).weight(.bold))
+                        .foregroundColor(.darkGray)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    
+                    ForEach(citySearchVM.searchHistoryVM.searchHistory, id: \.self) { term in
+                        Button(action: {
+                            citySearchVM.useHistoryItem(term)
+                        }) {
+                            HStack {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.darkGray)
+                                Text(term)
+                                    .foregroundColor(.black)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .background(Color.white)
+                .cornerRadius(8)
+                .padding(.horizontal, 8)
+                .frame(maxHeight: 110)
+            }
+            
             if citySearchVM.showSuggestions {
                 if citySearchVM.filteredCities.isEmpty {
                     Text("Oops. Looks like there's a typo :/")
