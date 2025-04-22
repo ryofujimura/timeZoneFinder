@@ -144,7 +144,7 @@ struct BackBodyView: View {
                 
                 // Add haptic feedback if available
                 #if os(macOS)
-                NSHapticFeedbackManager.defaultPerformer.performFeedback(.generic, performanceTime: .default)
+                NSHapticFeedbackManager.defaultPerformer.perform(.genericSelection, performanceTime: .default)
                 #endif
                 
                 // Visual flash effect
