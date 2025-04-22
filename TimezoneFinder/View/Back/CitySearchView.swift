@@ -45,6 +45,20 @@ struct BackBodyView: View {
         }
         return cityTimeZoneMap
     }
+    
+    // Map city names to their countries based on timezone identifiers
+    var cityCountries: [String: String] {
+        var cityCountryMap: [String: String] = [:]
+        for identifier in TimeZone.knownTimeZoneIdentifiers {
+            let parts = identifier.split(separator: "/")
+            if parts.count > 1 {
+                let city = String(parts.last!).replacingOccurrences(of: "_", with: " ")
+                let country = String(parts.first!)
+                cityCountryMap[city] = country
+            }
+        }
+        return cityCountryMap
+    }
 
     var filteredCities: [String] {
         cityTimeZones.keys.filter { $0.lowercased().contains(newCity.lowercased()) && !newCity.isEmpty }
@@ -145,7 +159,7 @@ struct BackBodyView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.darkGray)
                                     .padding(.trailing, 4)
-                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference, country: cityInfo.country)
                                 Spacer()
                                 Image(systemName: "xmark")
                                     .font(.system(size: 12, design: .rounded))
@@ -232,12 +246,13 @@ struct BackBodyView: View {
         let timeZoneIdentifier = cityTimeZones[city] ?? ""
         let timeZone = TimeZone(identifier: timeZoneIdentifier)
         _ = timeZone?.secondsFromGMT() ?? 0 / 3600
+        let country = cityCountries[city] ?? "Unknown"
 
         return HStack(spacing: 8) {
             Text(emoji)
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
-            Text(city)
+            Text("\(city), \(country)")
             Spacer()
             Text(cityTime(for: city))
                 .foregroundColor(.offblack)
@@ -258,8 +273,9 @@ struct BackBodyView: View {
             let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
 
             let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+            let country = cityCountries[city] ?? "Unknown"
 
-            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji)
+            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: country)
             viewModel.addCity(city: city, info: cityInfo)
 
             newCity = ""

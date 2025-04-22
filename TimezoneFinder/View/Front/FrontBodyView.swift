@@ -41,7 +41,7 @@ struct FrontBodyView: View {
                 VStack(spacing: 12) {
                     ForEach(viewModel.cityOrder, id: \.self) { city in
                         if let info = viewModel.cityData[city] {
-                            MatchCardView(viewModel: viewModel, location: city, timeDifference: info.timeDifference, emoji: info.emoji, globalAdjustedTime: $globalAdjustedTime)
+                            MatchCardView(viewModel: viewModel, location: city, timeDifference: info.timeDifference, emoji: info.emoji, country: info.country, globalAdjustedTime: $globalAdjustedTime)
                             //Update globalAdjustedTime as globalAdjustedTime is changed on other cards
                                 .id(globalAdjustedTime)
                         }

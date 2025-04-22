@@ -12,6 +12,7 @@ struct SearchResultView: View {
     var emoji: String
     var location: String
     var timeDifference: Int
+    var country: String = "" // Default empty string for "Your Location"
     
     var cityTime: String {
         let formatter = DateFormatter()
@@ -32,7 +33,11 @@ struct SearchResultView: View {
             Text(emoji)
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
-            Text(location)
+            if !country.isEmpty {
+                Text("\(location), \(country)")
+            } else {
+                Text(location)
+            }
             Spacer()
             Group {
                 if timeDifference + Calendar.current.component(.hour, from: Date()) > 24 {

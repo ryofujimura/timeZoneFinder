@@ -97,6 +97,7 @@ class DataModel: ObservableObject {
 struct CityInfo: Codable {
     var timeDifference: Int
     var emoji: String
+    var country: String
 }
 
 //Global colors
