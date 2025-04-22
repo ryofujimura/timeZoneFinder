@@ -135,18 +135,20 @@ struct BackBodyView: View {
                             .contentShape(Rectangle())
                     }
                     // Selected City locations
-                    ForEach(Array(viewModel.cityData.keys.sorted()), id: \.self) { city in
-                        if let cityInfo = viewModel.cityData[city] {
-                            HStack {
-                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                                Spacer()
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 12, design: .rounded))
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        deleteSelectedCity(city: city)
-                                    }
-                            }
+                    // Iterate directly over the array of CityEntry
+                    ForEach(viewModel.cityData) { entry in
+                        // No need to check for nil, entry is guaranteed
+                        HStack {
+                            // Access properties from the entry object
+                            SearchResultView(viewModel: viewModel, emoji: entry.info.emoji, location: entry.name, timeDifference: entry.info.timeDifference)
+                            Spacer()
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12, design: .rounded))
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    // Pass the entry's name to the delete function
+                                    deleteSelectedCity(cityName: entry.name)
+                                }
                         }
                     }
                 }
@@ -241,26 +243,43 @@ struct BackBodyView: View {
     }
 
     func addCity(city: String) {
-        if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
-            let localTimeZone = TimeZone.current
-            let localTime = Date()
+        // Check if the city already exists in the list
+        if !viewModel.cityData.contains(where: { $0.name == city }) {
+            if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
+                let localTimeZone = TimeZone.current
+                let localTime = Date()
 
-            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
-            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
+                let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
+                let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
 
-            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
+                let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
 
-            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
+                let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
 
-            viewModel.cityData[city] = CityInfo(timeDifference: timeDifference, emoji: emoji)
+                // Create a CityEntry object
+                let newEntry = CityEntry(name: city, info: CityInfo(timeDifference: timeDifference, emoji: emoji))
+                // Append the new entry to the array
+                viewModel.cityData.append(newEntry)
 
+                newCity = ""
+                showSuggestions = false
+            }
+        } else {
+            // Optionally handle the case where the city already exists (e.g., show an alert)
+            print("City \(city) already exists.")
+            // Clear search field even if city exists
             newCity = ""
             showSuggestions = false
         }
     }
 
-    func deleteSelectedCity(city: String) {
-        viewModel.cityData.removeValue(forKey: city)
+    // Updated function to accept cityName
+    func deleteSelectedCity(cityName: String) {
+        // Find the index of the city entry with the matching name
+        if let index = viewModel.cityData.firstIndex(where: { $0.name == cityName }) {
+            // Remove the entry at that index
+            viewModel.cityData.remove(at: index)
+        }
     }
 
     func cityTime(for city: String) -> String {
