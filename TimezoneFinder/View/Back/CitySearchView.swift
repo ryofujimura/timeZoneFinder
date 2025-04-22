@@ -89,7 +89,9 @@ struct BackBodyView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.darkGray)
                                 Text(term)
-                                    .foregroundColor(.black)
+                                    .font(.system(.caption, design: .rounded))
+                                    .fontWeight(.regular)
+                                    .foregroundColor(.darkGray)
                                 Spacer()
                             }
                             .padding(.horizontal, 8)
