@@ -125,40 +125,43 @@ struct BackBodyView: View {
                 .foregroundColor(.darkGray)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 8)
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 12) {
-                    // Current location
-                    HStack {
-                        SearchResultView(viewModel: viewModel, emoji: "📍", location: "Your Location", timeDifference: 0)
-                        Image(systemName: "lock")
-                            .font(.system(size: 12, design: .rounded))
-                            .contentShape(Rectangle())
-                    }
-                    
-                    // City list with drag and drop functionality
-                    List {
-                        ForEach(viewModel.cityOrder, id: \.self) { city in
-                            if let cityInfo = viewModel.cityData[city] {
-                                HStack {
-                                    SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                                    Spacer()
-                                    Image(systemName: "xmark")
-                                        .font(.system(size: 12, design: .rounded))
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            deleteSelectedCity(city: city)
-                                        }
-                                }
+            
+            // Current location (fixed, not movable)
+            HStack {
+                SearchResultView(viewModel: viewModel, emoji: "📍", location: "Your Location", timeDifference: 0)
+                Image(systemName: "lock")
+                    .font(.system(size: 12, design: .rounded))
+                    .contentShape(Rectangle())
+            }
+            .padding(.bottom, 8)
+            
+            // City list with drag and drop functionality
+            if !viewModel.cityOrder.isEmpty {
+                List {
+                    ForEach(viewModel.cityOrder, id: \.self) { city in
+                        if let cityInfo = viewModel.cityData[city] {
+                            HStack {
+                                Image(systemName: "line.3.horizontal")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.darkGray)
+                                    .padding(.trailing, 4)
+                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                                Spacer()
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 12, design: .rounded))
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        deleteSelectedCity(city: city)
+                                    }
                             }
                         }
-                        .onMove(perform: viewModel.moveCity)
                     }
-                    .listStyle(PlainListStyle())
-                    .environment(\.defaultMinListRowHeight, 30)
+                    .onMove(perform: viewModel.moveCity)
                 }
-                .padding(.bottom, 8)
+                .listStyle(PlainListStyle())
+                .frame(minHeight: 110, maxHeight: 200)
+                .environment(\.defaultMinListRowHeight, 30)
             }
-            .frame(minHeight: 110)
         }
         .padding(8)
         .cornerRadius(8)
