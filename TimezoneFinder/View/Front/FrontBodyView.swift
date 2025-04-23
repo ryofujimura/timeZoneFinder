@@ -50,6 +50,8 @@ struct FrontBodyView: View {
                 }
             }
         }
+        .scrollIndicators(.hidden)
+
     }
 }
 
