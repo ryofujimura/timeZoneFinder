@@ -17,10 +17,10 @@ struct FrontView: View {
             HeaderView(titleText: "Matcha Time", flipTo: flipToBack, iconImage: Image(systemName: "line.3.horizontal"))
             //ScrollView for more than 5 Cards
             //V2 will update to limit to 5 Cards
-            ScrollView{
+            ScrollView(showsIndicators: false){
                 FrontBodyView(viewModel: viewModel)
-
             }
+            
         }
         .frame(minHeight: 416, maxHeight: .infinity)
     }
