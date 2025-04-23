@@ -60,6 +60,7 @@ struct SearchResultView: View {
         .font(.system(.caption, design: .rounded).weight(.heavy))
         .frame(height: 17)
         .cornerRadius(20)
+//        .background(Color.lightGray)
     }
 }
 
