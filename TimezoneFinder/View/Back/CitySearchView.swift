@@ -37,6 +37,7 @@ struct BackBodyView: View {
             // Set focus to the text field when the view appears
             isTextFieldFocused = true
         }
+//        .background(Color.black)
     }
 
     // Search view: Search for city based on macOS time zone city data
@@ -69,7 +70,7 @@ struct BackBodyView: View {
             .padding(.leading, 8)
             .font(.system(.caption, design: .rounded).weight(.regular))
             .foregroundColor(.gray)
-            .background(Color.white)
+//            .background(Color.white)
             
             // Display search history when the text field is focused and empty
             if isTextFieldFocused && citySearchVM.newCity.isEmpty && !citySearchVM.searchHistoryVM.searchHistory.isEmpty {
@@ -77,7 +78,7 @@ struct BackBodyView: View {
                     Text("Recent Searches")
                         .font(.system(.caption, design: .rounded).weight(.bold))
                         .foregroundColor(.darkGray)
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 5)
                         .padding(.vertical, 4)
                     
                     ScrollView {
@@ -106,7 +107,7 @@ struct BackBodyView: View {
                     }
                     .frame(height: 64) // Height for approximately 2 items
                 }
-                .background(Color.white)
+//                .background(Color.white)
                 .cornerRadius(8)
                 .padding(.horizontal, 8)
                 .frame(maxHeight: 110)
@@ -239,34 +240,41 @@ struct BackBodyView: View {
             
             // City list with drag and drop functionality
             if !viewModel.cityOrder.isEmpty {
-                List {
-                    ForEach(viewModel.cityOrder, id: \.self) { city in
-                        if let cityInfo = viewModel.cityData[city] {
-                            HStack {
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.darkGray)
-                                    .padding(.trailing, 4)
-                                SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
-                                Spacer()
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 12, design: .rounded))
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        citySearchVM.deleteSelectedCity(city: city)
-                                    }
+                ZStack {
+                    // Color.black
+                    
+                    List {
+                        ForEach(viewModel.cityOrder, id: \.self) { city in
+                            if let cityInfo = viewModel.cityData[city] {
+                                HStack {
+                                    Image(systemName: "line.3.horizontal")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.darkGray)
+                                        .padding(.trailing, 4)
+                                    SearchResultView(viewModel: viewModel, emoji: cityInfo.emoji, location: city, timeDifference: cityInfo.timeDifference)
+                                    Spacer()
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 12, design: .rounded))
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            citySearchVM.deleteSelectedCity(city: city)
+                                        }
+                                }
+//                                .listRowBackground(Color.clear)
+//                                .background(Color.clear)
                             }
                         }
+                        .onMove(perform: viewModel.moveCity)
                     }
-                    .onMove(perform: viewModel.moveCity)
+                    .listStyle(PlainListStyle())
+                    .environment(\.defaultMinListRowHeight, 30)
+                    .scrollContentBackground(.hidden)
                 }
-                .listStyle(PlainListStyle())
                 .frame(minHeight: 110, maxHeight: 200)
-                .environment(\.defaultMinListRowHeight, 30)
             }
         }
         .padding(8)
-        .cornerRadius(8)
+        .cornerRadius(8)        
     }
 
     var settingsBottomView: some View {
