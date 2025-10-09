@@ -57,6 +57,17 @@ struct BackBodyView: View {
                         selectedCityIndex = 0
                         // Clear any previous search errors
                         citySearchVM.searchError = nil
+                        
+                        // Auto-trigger online search if no offline matches and user stops typing
+                        if !newValue.isEmpty && citySearchVM.filteredCities.isEmpty {
+                            // Use a small delay to avoid searching on every keystroke
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                // Only search if the text hasn't changed and still no offline matches
+                                if citySearchVM.newCity == newValue && citySearchVM.filteredCities.isEmpty && !citySearchVM.isSearchingOnline {
+                                    citySearchVM.addCity(city: newValue)
+                                }
+                            }
+                        }
                     }
                 if !citySearchVM.newCity.isEmpty {
                     Button(action: {
@@ -116,44 +127,26 @@ struct BackBodyView: View {
             }
             
             if citySearchVM.showSuggestions {
-                if citySearchVM.isSearchingOnline {
-                    HStack {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Searching online...")
-                            .font(.system(.caption, design: .rounded).weight(.regular))
-                            .foregroundColor(.darkGray)
-                    }
-                    .frame(height: 110)
-                } else if citySearchVM.filteredCities.isEmpty {
+                if citySearchVM.filteredCities.isEmpty {
                     VStack(spacing: 8) {
                         if let error = citySearchVM.searchError {
                             Text(error)
                                 .foregroundColor(.red)
                                 .font(.system(.caption, design: .rounded).weight(.regular))
                                 .multilineTextAlignment(.center)
+                        } else if citySearchVM.isSearchingOnline {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Searching online...")
+                                    .font(.system(.caption, design: .rounded).weight(.regular))
+                                    .foregroundColor(.darkGray)
+                            }
                         } else {
                             Text("No offline matches found")
                                 .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.6))
                                 .font(.system(.caption, design: .rounded).weight(.regular))
                         }
-                        
-                        Button(action: {
-                            citySearchVM.addCity(city: citySearchVM.newCity)
-                        }) {
-                            HStack {
-                                Image(systemName: "globe")
-                                    .font(.system(size: 12))
-                                Text("Search online for \"\(citySearchVM.newCity)\"")
-                                    .font(.system(.caption, design: .rounded).weight(.medium))
-                            }
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(16)
-                        }
-                        .buttonStyle(PlainButtonStyle())
                     }
                     .frame(height: 110)
                 } else {
