@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import MapKit
 
 class DataModel: ObservableObject {
     @Published var timeFormat: String = "12hr" {
@@ -104,6 +105,7 @@ struct CityInfo: Codable {
     var timeDifference: Int
     var emoji: String
     var country: String
+    var timeZoneID: String // Store the timezone identifier for offline use
 }
 
 //Global colors
@@ -154,10 +156,34 @@ extension DataModel {
     }
 }
 
+// MARK: - MapKit City Resolver
+func resolveCityToTimeZone(
+    query: String,
+    completion: @escaping ((String, TimeZone)?) -> Void
+) {
+    let req = MKLocalSearch.Request()
+    req.naturalLanguageQuery = query
+    req.resultTypes = [.address, .pointOfInterest] // cities/regions are fine
+
+    MKLocalSearch(request: req).start { resp, err in
+        guard let item = resp?.mapItems.first,
+              let tz = item.placemark.timeZone else {
+            completion(nil) // Signal no match found
+            return
+        }
+        let city = item.placemark.locality ?? item.name ?? query
+        let admin = item.placemark.administrativeArea
+        let country = item.placemark.isoCountryCode
+        let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
+        completion((label, tz))
+    }
+}
+
 // MARK: - CitySearchViewModel
 class CitySearchViewModel: ObservableObject {
     @Published var newCity = ""
     @Published var showSuggestions = false
+    @Published var isSearchingOnline = false // Loading state for MapKit searches
     
     // Search history view model
     @ObservedObject var searchHistoryVM = SearchHistoryViewModel()
@@ -250,30 +276,52 @@ class CitySearchViewModel: ObservableObject {
     }
     
     func addCity(city: String) {
+        // First try offline search
         if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
-            let localTimeZone = TimeZone.current
-            let localTime = Date()
-            
-            let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
-            let cityTimeOffset = cityTimeZone.secondsFromGMT(for: localTime)
-            
-            let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
-            
-            let emoji = cityEmojis[city] ?? randomEmojis.randomElement() ?? "🌍"
-            
-            // Get country information
-            let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: timeZoneIdentifier)
-            
-            let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName)
-            
-            // Use original city name as the key but include country in the displayed name
-            dataModel.addCity(city: city, info: cityInfo)
-            
-            // Add the search term to search history
-            searchHistoryVM.addSearchTerm(newCity)
-            
-            clearSearch()
+            addCityWithTimeZone(city: city, timeZone: cityTimeZone, timeZoneID: timeZoneIdentifier)
+        } else {
+            // Fallback to MapKit search
+            isSearchingOnline = true
+            resolveCityToTimeZone(query: city) { [weak self] result in
+                DispatchQueue.main.async {
+                    self?.isSearchingOnline = false
+                    
+                    if let (label, timeZone) = result {
+                        self?.addCityWithTimeZone(city: label, timeZone: timeZone, timeZoneID: timeZone.identifier)
+                    } else {
+                        // Handle no match found - could show an error message
+                        print("No timezone found for: \(city)")
+                    }
+                }
+            }
         }
+    }
+    
+    private func addCityWithTimeZone(city: String, timeZone: TimeZone, timeZoneID: String) {
+        let localTimeZone = TimeZone.current
+        let localTime = Date()
+        
+        let localTimeOffset = localTimeZone.secondsFromGMT(for: localTime)
+        let cityTimeOffset = timeZone.secondsFromGMT(for: localTime)
+        
+        let timeDifference = (cityTimeOffset - localTimeOffset) / 3600
+        
+        // Extract city name for emoji lookup (before comma if present)
+        let cityNameForEmoji = city.components(separatedBy: ",").first ?? city
+        let emoji = cityEmojis[cityNameForEmoji] ?? randomEmojis.randomElement() ?? "🌍"
+        
+        // Extract country from the full label
+        let countryName = city.components(separatedBy: ",").last?.trimmingCharacters(in: .whitespaces) ?? ""
+        
+        let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName, timeZoneID: timeZoneID)
+        
+        // Use the full label as the key for display
+        dataModel.addCity(city: city, info: cityInfo)
+        
+        // Add the search term to search history
+        searchHistoryVM.addSearchTerm(newCity)
+        
+        clearSearch()
     }
     
     func deleteSelectedCity(city: String) {
@@ -281,6 +329,19 @@ class CitySearchViewModel: ObservableObject {
     }
     
     func cityTime(for city: String) -> String {
+        // First try to get timezone from stored city data (for offline cities)
+        if let cityInfo = dataModel.cityData[city],
+           let timeZone = TimeZone(identifier: cityInfo.timeZoneID) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = dataModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
+            formatter.locale = Locale(identifier: "en_US")
+            formatter.amSymbol = "am"
+            formatter.pmSymbol = "pm"
+            formatter.timeZone = timeZone
+            return formatter.string(from: Date())
+        }
+        
+        // Fallback to original method for suggestions
         guard let timeZoneIdentifier = cityTimeZones[city],
               let timeZone = TimeZone(identifier: timeZoneIdentifier) else {
             return "Error"

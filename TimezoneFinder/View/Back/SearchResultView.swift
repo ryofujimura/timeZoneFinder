@@ -20,6 +20,23 @@ struct SearchResultView: View {
         formatter.amSymbol = "am"
         formatter.pmSymbol = "pm"
 
+        // For "Your Location", use time difference calculation
+        if location == "Your Location" {
+            if let adjustedDate = Calendar.current.date(byAdding: .hour, value: timeDifference, to: Date()) {
+                return formatter.string(from: adjustedDate)
+            } else {
+                return "Error"
+            }
+        }
+        
+        // For saved cities, use stored timeZoneID if available
+        if let cityInfo = viewModel.cityData[location],
+           let timeZone = TimeZone(identifier: cityInfo.timeZoneID) {
+            formatter.timeZone = timeZone
+            return formatter.string(from: Date())
+        }
+        
+        // Fallback to time difference calculation
         if let adjustedDate = Calendar.current.date(byAdding: .hour, value: timeDifference, to: Date()) {
             return formatter.string(from: adjustedDate)
         } else {

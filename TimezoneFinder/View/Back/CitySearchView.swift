@@ -114,11 +114,39 @@ struct BackBodyView: View {
             }
             
             if citySearchVM.showSuggestions {
-                if citySearchVM.filteredCities.isEmpty {
-                    Text("Oops. Looks like there's a typo :/")
-                        .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.4))
-                        .font(.system(.caption, design: .rounded).weight(.bold))
-                        .frame(height: 110)
+                if citySearchVM.isSearchingOnline {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Searching online...")
+                            .font(.system(.caption, design: .rounded).weight(.regular))
+                            .foregroundColor(.darkGray)
+                    }
+                    .frame(height: 110)
+                } else if citySearchVM.filteredCities.isEmpty {
+                    VStack(spacing: 8) {
+                        Text("No offline matches found")
+                            .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.6))
+                            .font(.system(.caption, design: .rounded).weight(.regular))
+                        
+                        Button(action: {
+                            citySearchVM.addCity(city: citySearchVM.newCity)
+                        }) {
+                            HStack {
+                                Image(systemName: "globe")
+                                    .font(.system(size: 12))
+                                Text("Search online for \"\(citySearchVM.newCity)\"")
+                                    .font(.system(.caption, design: .rounded).weight(.medium))
+                            }
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(16)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .frame(height: 110)
                 } else {
                     ScrollView(showsIndicators: false) {
                         ScrollViewReader { scrollProxy in
