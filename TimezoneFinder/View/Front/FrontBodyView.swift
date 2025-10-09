@@ -41,7 +41,8 @@ struct FrontBodyView: View {
                 VStack(spacing: 12) {
                     ForEach(viewModel.cityOrder, id: \.self) { city in
                         if let info = viewModel.cityData[city] {
-                            let displayName = info.country.isEmpty ? city : "\(city), \(info.country)"
+                            // Use the country field which now contains the full formatted location
+                            let displayName = info.country.isEmpty ? city : info.country
                             MatchCardView(viewModel: viewModel, location: displayName, timeDifference: info.timeDifference, emoji: info.emoji, globalAdjustedTime: $globalAdjustedTime)
                             //Update globalAdjustedTime as globalAdjustedTime is changed on other cards
                                 .id(globalAdjustedTime)

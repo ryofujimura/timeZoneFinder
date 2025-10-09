@@ -347,7 +347,83 @@ class CitySearchViewModel: ObservableObject {
     func displayNameForCity(city: String) -> String {
         if let identifier = cityTimeZones[city] {
             let countryName = getCountryNameForCity(city: city, timeZoneIdentifier: identifier)
-            return countryName.isEmpty ? city : "\(city), \(countryName)"
+            
+            // Try to extract state information from timezone identifier
+            var stateName = ""
+            let parts = identifier.split(separator: "/")
+            if parts.count >= 2 {
+                // For US timezones, try to get state from the second part
+                if parts[0] == "America" && parts.count >= 3 {
+                    let statePart = String(parts[1])
+                    // Map common US state abbreviations to full names
+                    let stateMappings: [String: String] = [
+                        "New_York": "NY",
+                        "Chicago": "IL", 
+                        "Denver": "CO",
+                        "Los_Angeles": "CA",
+                        "Phoenix": "AZ",
+                        "Anchorage": "AK",
+                        "Honolulu": "HI",
+                        "Detroit": "MI",
+                        "Indiana": "IN",
+                        "Kentucky": "KY",
+                        "Tennessee": "TN",
+                        "North_Dakota": "ND",
+                        "South_Dakota": "SD",
+                        "Nebraska": "NE",
+                        "Kansas": "KS",
+                        "Texas": "TX",
+                        "Oklahoma": "OK",
+                        "Arkansas": "AR",
+                        "Louisiana": "LA",
+                        "Mississippi": "MS",
+                        "Alabama": "AL",
+                        "Georgia": "GA",
+                        "Florida": "FL",
+                        "South_Carolina": "SC",
+                        "North_Carolina": "NC",
+                        "Virginia": "VA",
+                        "West_Virginia": "WV",
+                        "Maryland": "MD",
+                        "Delaware": "DE",
+                        "New_Jersey": "NJ",
+                        "Pennsylvania": "PA",
+                        "Ohio": "OH",
+                        "Michigan": "MI",
+                        "Wisconsin": "WI",
+                        "Minnesota": "MN",
+                        "Iowa": "IA",
+                        "Missouri": "MO",
+                        "Illinois": "IL",
+                        "New_Mexico": "NM",
+                        "Arizona": "AZ",
+                        "Utah": "UT",
+                        "Colorado": "CO",
+                        "Wyoming": "WY",
+                        "Montana": "MT",
+                        "California": "CA",
+                        "Nevada": "NV",
+                        "Oregon": "OR",
+                        "Washington": "WA",
+                        "Alaska": "AK",
+                        "Hawaii": "HI"
+                    ]
+                    stateName = stateMappings[statePart] ?? ""
+                }
+            }
+            
+            // Build the display name with proper formatting
+            var displayComponents: [String] = [city]
+            
+            if !stateName.isEmpty {
+                displayComponents.append(stateName)
+            }
+            
+            if !countryName.isEmpty {
+                displayComponents.append(countryName)
+            }
+            
+            return displayComponents.joined(separator: ", ")
         }
         return city
     }
@@ -355,7 +431,9 @@ class CitySearchViewModel: ObservableObject {
     func addCity(city: String) {
         // First try offline search
         if let timeZoneIdentifier = cityTimeZones[city], let cityTimeZone = TimeZone(identifier: timeZoneIdentifier) {
-            addCityWithTimeZone(city: city, timeZone: cityTimeZone, timeZoneID: timeZoneIdentifier)
+            // Use the formatted display name that includes state/country information
+            let formattedCityName = displayNameForCity(city: city)
+            addCityWithTimeZone(city: formattedCityName, timeZone: cityTimeZone, timeZoneID: timeZoneIdentifier)
         } else {
             // Fallback to MapKit search
             searchOnlineForCity(city)
