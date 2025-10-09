@@ -55,6 +55,8 @@ struct BackBodyView: View {
                         citySearchVM.showSuggestions = !newValue.isEmpty
                         // Reset selection index when search query changes
                         selectedCityIndex = 0
+                        // Clear any previous search errors
+                        citySearchVM.searchError = nil
                     }
                 if !citySearchVM.newCity.isEmpty {
                     Button(action: {
@@ -125,9 +127,16 @@ struct BackBodyView: View {
                     .frame(height: 110)
                 } else if citySearchVM.filteredCities.isEmpty {
                     VStack(spacing: 8) {
-                        Text("No offline matches found")
-                            .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.6))
-                            .font(.system(.caption, design: .rounded).weight(.regular))
+                        if let error = citySearchVM.searchError {
+                            Text(error)
+                                .foregroundColor(.red)
+                                .font(.system(.caption, design: .rounded).weight(.regular))
+                                .multilineTextAlignment(.center)
+                        } else {
+                            Text("No offline matches found")
+                                .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.6))
+                                .font(.system(.caption, design: .rounded).weight(.regular))
+                        }
                         
                         Button(action: {
                             citySearchVM.addCity(city: citySearchVM.newCity)

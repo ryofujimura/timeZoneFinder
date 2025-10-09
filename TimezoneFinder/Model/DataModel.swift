@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import MapKit
+import CoreLocation
 
 class DataModel: ObservableObject {
     @Published var timeFormat: String = "12hr" {
@@ -166,24 +167,71 @@ func resolveCityToTimeZone(
     req.resultTypes = [.address, .pointOfInterest] // cities/regions are fine
 
     MKLocalSearch(request: req).start { resp, err in
-        guard let item = resp?.mapItems.first,
-              let tz = item.placemark.timeZone else {
-            completion(nil) // Signal no match found
+        if let error = err {
+            print("MapKit search error for '\(query)': \(error.localizedDescription)")
+            completion(nil)
             return
         }
-        let city = item.placemark.locality ?? item.name ?? query
-        let admin = item.placemark.administrativeArea
-        let country = item.placemark.isoCountryCode
-        let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
-        completion((label, tz))
+        
+        guard let response = resp, !response.mapItems.isEmpty else {
+            print("No MapKit results found for '\(query)'")
+            completion(nil)
+            return
+        }
+        
+        // Try multiple results to find one with timezone
+        for item in response.mapItems {
+            if let tz = item.placemark.timeZone {
+                let city = item.placemark.locality ?? item.name ?? query
+                let admin = item.placemark.administrativeArea
+                let country = item.placemark.isoCountryCode
+                let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
+                print("Found timezone for '\(query)': \(tz.identifier) -> \(label)")
+                completion((label, tz))
+                return
+            }
+        }
+        
+        // If no timezone found, try to infer from coordinates using CLGeocoder
+        if let firstItem = response.mapItems.first {
+            let coordinate = firstItem.placemark.coordinate
+            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            
+            // Use CLGeocoder to get timezone from coordinates
+            CLGeocoder().reverseGeocodeLocation(location) { placemarks, error in
+                if let error = error {
+                    print("Reverse geocoding error for '\(query)': \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                if let placemark = placemarks?.first, let timeZone = placemark.timeZone {
+                    let city = firstItem.placemark.locality ?? firstItem.name ?? query
+                    let admin = firstItem.placemark.administrativeArea
+                    let country = firstItem.placemark.isoCountryCode
+                    let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
+                    print("Inferred timezone for '\(query)': \(timeZone.identifier) -> \(label)")
+                    completion((label, timeZone))
+                } else {
+                    print("No timezone found for '\(query)' in any MapKit result")
+                    completion(nil)
+                }
+            }
+            return
+        }
+        
+        print("No timezone found for '\(query)' in any MapKit result")
+        completion(nil)
     }
 }
+
 
 // MARK: - CitySearchViewModel
 class CitySearchViewModel: ObservableObject {
     @Published var newCity = ""
     @Published var showSuggestions = false
     @Published var isSearchingOnline = false // Loading state for MapKit searches
+    @Published var searchError: String? = nil // Error message for failed searches
     
     // Search history view model
     @ObservedObject var searchHistoryVM = SearchHistoryViewModel()
@@ -282,6 +330,7 @@ class CitySearchViewModel: ObservableObject {
         } else {
             // Fallback to MapKit search
             isSearchingOnline = true
+            searchError = nil
             resolveCityToTimeZone(query: city) { [weak self] result in
                 DispatchQueue.main.async {
                     self?.isSearchingOnline = false
@@ -289,7 +338,8 @@ class CitySearchViewModel: ObservableObject {
                     if let (label, timeZone) = result {
                         self?.addCityWithTimeZone(city: label, timeZone: timeZone, timeZoneID: timeZone.identifier)
                     } else {
-                        // Handle no match found - could show an error message
+                        // Handle no match found - show error message
+                        self?.searchError = "No timezone found for '\(city)'. Please try a different city name."
                         print("No timezone found for: \(city)")
                     }
                 }
