@@ -49,7 +49,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if popover.isShown {
                 popover.performClose(sender)
             } else {
-                contentView = ContentView()  // Reinstantiate ContentView each time before showing
+                // Reuse existing ContentView to maintain state consistency
+                if contentView == nil {
+                    contentView = ContentView()
+                }
                 let hostingController = NSHostingController(rootView: contentView!)
                 popover.contentViewController = hostingController
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
