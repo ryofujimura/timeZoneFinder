@@ -232,12 +232,13 @@ class CitySearchViewModel: ObservableObject {
     @Published var showSuggestions = false
     @Published var isSearchingOnline = false // Loading state for MapKit searches
     @Published var searchError: String? = nil // Error message for failed searches
+    @Published var onlineSearchResults: [(String, TimeZone)] = [] // Results from MapKit search
     
     // Search history view model
     @ObservedObject var searchHistoryVM = SearchHistoryViewModel()
     
     // Main DataModel reference
-    private let dataModel: DataModel
+    let dataModel: DataModel
     
     // Country name mappings for better display
     let countryNameMappings: [String: String] = [
@@ -329,22 +330,34 @@ class CitySearchViewModel: ObservableObject {
             addCityWithTimeZone(city: city, timeZone: cityTimeZone, timeZoneID: timeZoneIdentifier)
         } else {
             // Fallback to MapKit search
-            isSearchingOnline = true
-            searchError = nil
-            resolveCityToTimeZone(query: city) { [weak self] result in
-                DispatchQueue.main.async {
-                    self?.isSearchingOnline = false
-                    
-                    if let (label, timeZone) = result {
-                        self?.addCityWithTimeZone(city: label, timeZone: timeZone, timeZoneID: timeZone.identifier)
-                    } else {
-                        // Handle no match found - show error message
-                        self?.searchError = "No timezone found for '\(city)'. Please try a different city name."
-                        print("No timezone found for: \(city)")
-                    }
+            searchOnlineForCity(city)
+        }
+    }
+    
+    func searchOnlineForCity(_ city: String) {
+        isSearchingOnline = true
+        searchError = nil
+        onlineSearchResults = []
+        
+        resolveCityToTimeZone(query: city) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isSearchingOnline = false
+                
+                if let (label, timeZone) = result {
+                    self?.onlineSearchResults = [(label, timeZone)]
+                } else {
+                    // Handle no match found - show error message
+                    self?.searchError = "No timezone found for '\(city)'. Please try a different city name."
+                    print("No timezone found for: \(city)")
                 }
             }
         }
+    }
+    
+    func addOnlineSearchResult(_ result: (String, TimeZone)) {
+        let (label, timeZone) = result
+        addCityWithTimeZone(city: label, timeZone: timeZone, timeZoneID: timeZone.identifier)
+        onlineSearchResults = [] // Clear results after adding
     }
     
     private func addCityWithTimeZone(city: String, timeZone: TimeZone, timeZoneID: String) {

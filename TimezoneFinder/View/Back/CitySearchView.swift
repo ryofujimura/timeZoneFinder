@@ -55,8 +55,9 @@ struct BackBodyView: View {
                         citySearchVM.showSuggestions = !newValue.isEmpty
                         // Reset selection index when search query changes
                         selectedCityIndex = 0
-                        // Clear any previous search errors
+                        // Clear any previous search errors and online results
                         citySearchVM.searchError = nil
+                        citySearchVM.onlineSearchResults = []
                         
                         // Auto-trigger online search if no offline matches and user stops typing
                         if !newValue.isEmpty && citySearchVM.filteredCities.isEmpty {
@@ -64,7 +65,7 @@ struct BackBodyView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 // Only search if the text hasn't changed and still no offline matches
                                 if citySearchVM.newCity == newValue && citySearchVM.filteredCities.isEmpty && !citySearchVM.isSearchingOnline {
-                                    citySearchVM.addCity(city: newValue)
+                                    citySearchVM.searchOnlineForCity(newValue)
                                 }
                             }
                         }
@@ -153,6 +154,7 @@ struct BackBodyView: View {
                     ScrollView(showsIndicators: false) {
                         ScrollViewReader { scrollProxy in
                             VStack(spacing: 0) {
+                                // Show offline results first
                                 ForEach(Array(citySearchVM.filteredCities.enumerated()), id: \.element) { index, city in
                                     suggestionView(for: city)
                                         .id(index) // Add ID for ScrollViewReader
@@ -163,6 +165,23 @@ struct BackBodyView: View {
                                         .padding(.vertical, 2)
                                         .onTapGesture {
                                             citySearchVM.addCity(city: city)
+                                        }
+                                }
+                                
+                                // Show online search results
+                                ForEach(Array(citySearchVM.onlineSearchResults.enumerated()), id: \.element.0) { index, result in
+                                    let (label, timeZone) = result
+                                    let adjustedIndex = citySearchVM.filteredCities.count + index
+                                    
+                                    onlineSuggestionView(for: label, timeZone: timeZone)
+                                        .id(adjustedIndex) // Add ID for ScrollViewReader
+                                        .contentShape(Rectangle())
+                                        .cornerRadius(25)
+                                        .background(selectedCityIndex == adjustedIndex ? Color.lightGray : Color.clear)
+                                        .cornerRadius(8)
+                                        .padding(.vertical, 2)
+                                        .onTapGesture {
+                                            citySearchVM.addOnlineSearchResult(result)
                                         }
                                 }
                             }
@@ -185,14 +204,16 @@ struct BackBodyView: View {
 
     // Handle keyboard events
     func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
-        // Only handle keys when suggestions are visible
-        guard citySearchVM.showSuggestions && !citySearchVM.filteredCities.isEmpty else {
+        let totalItems = citySearchVM.filteredCities.count + citySearchVM.onlineSearchResults.count
+        
+        // Only handle keys when suggestions are visible and there are items to navigate
+        guard citySearchVM.showSuggestions && totalItems > 0 else {
             return .ignored
         }
         
         switch press.key {
         case .downArrow:
-            if selectedCityIndex < citySearchVM.filteredCities.count - 1 {
+            if selectedCityIndex < totalItems - 1 {
                 selectedCityIndex += 1
             } else {
                 // Cycle back to the first item when at the end
@@ -201,7 +222,7 @@ struct BackBodyView: View {
             return .handled
             
         case .tab:
-            if selectedCityIndex < citySearchVM.filteredCities.count - 1 {
+            if selectedCityIndex < totalItems - 1 {
                 selectedCityIndex += 1
             } else {
                 // Cycle back to the first item when at the end
@@ -214,7 +235,7 @@ struct BackBodyView: View {
                 selectedCityIndex -= 1
             } else {
                 // Cycle to the last item when at the beginning
-                selectedCityIndex = citySearchVM.filteredCities.count - 1
+                selectedCityIndex = totalItems - 1
             }
             return .handled
             
@@ -223,14 +244,12 @@ struct BackBodyView: View {
                 selectedCityIndex -= 1
             } else {
                 // Cycle to the last item when at the beginning
-                selectedCityIndex = citySearchVM.filteredCities.count - 1
+                selectedCityIndex = totalItems - 1
             }
             return .handled
             
         case .return:
-            if selectedCityIndex >= 0 && selectedCityIndex < citySearchVM.filteredCities.count {
-                let selectedCity = citySearchVM.filteredCities[selectedCityIndex]
-                
+            if selectedCityIndex >= 0 && selectedCityIndex < totalItems {
                 // Add haptic feedback if available
                 #if os(macOS)
                 NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .default)
@@ -242,7 +261,18 @@ struct BackBodyView: View {
                     // which clears the suggestions
                 }
                 
-                citySearchVM.addCity(city: selectedCity)
+                if selectedCityIndex < citySearchVM.filteredCities.count {
+                    // Offline result
+                    let selectedCity = citySearchVM.filteredCities[selectedCityIndex]
+                    citySearchVM.addCity(city: selectedCity)
+                } else {
+                    // Online result
+                    let onlineIndex = selectedCityIndex - citySearchVM.filteredCities.count
+                    if onlineIndex < citySearchVM.onlineSearchResults.count {
+                        let result = citySearchVM.onlineSearchResults[onlineIndex]
+                        citySearchVM.addOnlineSearchResult(result)
+                    }
+                }
             }
             return .handled
             
@@ -378,6 +408,32 @@ struct BackBodyView: View {
             Text(displayName)
             Spacer()
             Text(citySearchVM.cityTime(for: city))
+                .foregroundColor(.offblack)
+        }
+        .font(.system(.caption, design: .rounded))
+        .frame(height: 17)
+        .cornerRadius(20)
+    }
+    
+    func onlineSuggestionView(for label: String, timeZone: TimeZone) -> some View {
+        let cityName = label.components(separatedBy: ",").first ?? label
+        let emoji = citySearchVM.cityEmojis[cityName] ?? citySearchVM.randomEmojis.randomElement() ?? "🌍"
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = citySearchVM.dataModel.timeFormat == "12hr" ? "h:mm a" : "HH:mm"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.amSymbol = "am"
+        formatter.pmSymbol = "pm"
+        formatter.timeZone = timeZone
+        let timeString = formatter.string(from: Date())
+
+        return HStack(spacing: 8) {
+            Text(emoji)
+                .font(.system(.callout, design: .rounded).weight(.regular))
+                .opacity(0.8)
+            Text(label)
+            Spacer()
+            Text(timeString)
                 .foregroundColor(.offblack)
         }
         .font(.system(.caption, design: .rounded))
