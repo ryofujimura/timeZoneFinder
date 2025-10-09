@@ -128,7 +128,7 @@ struct BackBodyView: View {
             }
             
             if citySearchVM.showSuggestions {
-                if citySearchVM.filteredCities.isEmpty {
+                if citySearchVM.filteredCities.isEmpty && citySearchVM.onlineSearchResults.isEmpty {
                     VStack(spacing: 8) {
                         if let error = citySearchVM.searchError {
                             Text(error)
@@ -139,14 +139,10 @@ struct BackBodyView: View {
                             HStack {
                                 ProgressView()
                                     .scaleEffect(0.8)
-                                Text("Searching online...")
+                                Text("Searching...")
                                     .font(.system(.caption, design: .rounded).weight(.regular))
                                     .foregroundColor(.darkGray)
                             }
-                        } else {
-                            Text("No offline matches found")
-                                .foregroundColor(Color(red: 132/256, green: 132/256, blue: 132/256).opacity(0.6))
-                                .font(.system(.caption, design: .rounded).weight(.regular))
                         }
                     }
                     .frame(height: 110)
