@@ -185,7 +185,21 @@ func resolveCityToTimeZone(
                 let city = item.placemark.locality ?? item.name ?? query
                 let admin = item.placemark.administrativeArea
                 let country = item.placemark.isoCountryCode
-                let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
+                
+                // Create label without duplicates
+                var labelComponents: [String] = [city]
+                
+                // Add administrative area only if it's different from city and not empty
+                if let admin = admin, !admin.isEmpty && admin != city {
+                    labelComponents.append(admin)
+                }
+                
+                // Add country code only if it's different from admin area and not empty
+                if let country = country, !country.isEmpty && country != admin {
+                    labelComponents.append(country)
+                }
+                
+                let label = labelComponents.joined(separator: ", ")
                 print("Found timezone for '\(query)': \(tz.identifier) -> \(label)")
                 completion((label, tz))
                 return
@@ -209,7 +223,21 @@ func resolveCityToTimeZone(
                     let city = firstItem.placemark.locality ?? firstItem.name ?? query
                     let admin = firstItem.placemark.administrativeArea
                     let country = firstItem.placemark.isoCountryCode
-                    let label = [city, admin, country].compactMap { $0 }.joined(separator: ", ")
+                    
+                    // Create label without duplicates
+                    var labelComponents: [String] = [city]
+                    
+                    // Add administrative area only if it's different from city and not empty
+                    if let admin = admin, !admin.isEmpty && admin != city {
+                        labelComponents.append(admin)
+                    }
+                    
+                    // Add country code only if it's different from admin area and not empty
+                    if let country = country, !country.isEmpty && country != admin {
+                        labelComponents.append(country)
+                    }
+                    
+                    let label = labelComponents.joined(separator: ", ")
                     print("Inferred timezone for '\(query)': \(timeZone.identifier) -> \(label)")
                     completion((label, timeZone))
                 } else {
@@ -373,10 +401,9 @@ class CitySearchViewModel: ObservableObject {
         let cityNameForEmoji = city.components(separatedBy: ",").first ?? city
         let emoji = cityEmojis[cityNameForEmoji] ?? randomEmojis.randomElement() ?? "🌍"
         
-        // Extract country from the full label
-        let countryName = city.components(separatedBy: ",").last?.trimmingCharacters(in: .whitespaces) ?? ""
-        
-        let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: countryName, timeZoneID: timeZoneID)
+        // Store the full formatted location as the country field for display purposes
+        // The location string is already properly formatted with city, state, country
+        let cityInfo = CityInfo(timeDifference: timeDifference, emoji: emoji, country: city, timeZoneID: timeZoneID)
         
         // Use the full label as the key for display
         dataModel.addCity(city: city, info: cityInfo)

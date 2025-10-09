@@ -50,14 +50,8 @@ struct SearchResultView: View {
                 .font(.system(.callout, design: .rounded).weight(.regular))
                 .opacity(0.8)
             
-            // Get the city info to check for country
-            if location != "Your Location", let cityInfo = viewModel.cityData[location] {
-                // Use the country if available
-                let displayName = cityInfo.country.isEmpty ? location : "\(location), \(cityInfo.country)"
-                Text(displayName)
-            } else {
-                Text(location)
-            }
+            // Display the location as-is since it's already properly formatted
+            Text(location)
             
             Spacer()
             Group {

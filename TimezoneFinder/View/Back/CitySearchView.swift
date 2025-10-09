@@ -287,12 +287,20 @@ struct BackBodyView: View {
             
             // Current location (fixed, not movable)
             HStack {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 12))
+                    .foregroundColor(.darkGray)
+                    .padding(.trailing, 4)
+                    .hidden()
                 SearchResultView(viewModel: viewModel, emoji: "📍", location: "Your Location", timeDifference: 0)
+                Spacer()
                 Image(systemName: "lock")
                     .font(.system(size: 12, design: .rounded))
                     .contentShape(Rectangle())
             }
-            .padding(.bottom, 8)
+            .padding(EdgeInsets(top: 0, leading: -4, bottom: 0, trailing: -2))
+            .padding(.horizontal, 8)
+            .padding(.bottom, 4)
             
             // City list with drag and drop functionality
             if !viewModel.cityOrder.isEmpty {
@@ -316,12 +324,15 @@ struct BackBodyView: View {
                                             citySearchVM.deleteSelectedCity(city: city)
                                         }
                                 }
+                                .listRowInsets(EdgeInsets(top: 0, leading: -4, bottom: 0, trailing: -4))
+//                                .listRowInsets(.init(top: 0, leading: -8, bottom: 0, trailing: -8))
 //                                .listRowBackground(Color.clear)
 //                                .background(Color.clear)
                             }
                         }
                         .onMove(perform: viewModel.moveCity)
                     }
+                    
                     .listStyle(PlainListStyle())
                     .environment(\.defaultMinListRowHeight, 30)
                     .scrollContentBackground(.hidden)
@@ -329,8 +340,8 @@ struct BackBodyView: View {
                 .frame(minHeight: 110, maxHeight: 200)
             }
         }
-        .padding(8)
-        .cornerRadius(8)        
+//        .padding(8)
+        .cornerRadius(8)
     }
 
     var settingsBottomView: some View {
