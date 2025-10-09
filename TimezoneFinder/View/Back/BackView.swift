@@ -17,7 +17,7 @@ struct BackView: View {
             HeaderView(titleText: "Matcha Time", flipTo: flipToFront, iconImage: Image("vector"))
             BackBodyView(viewModel: viewModel)
         }
-        .frame(minHeight: 416)
+        .frame(minHeight: 416, maxHeight: 416)
     }
 }
 

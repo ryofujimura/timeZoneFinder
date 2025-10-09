@@ -49,7 +49,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if popover.isShown {
                 popover.performClose(sender)
             } else {
-                // Reuse existing ContentView to maintain state consistency
+                // Only recreate ContentView if it doesn't exist
                 if contentView == nil {
                     contentView = ContentView()
                 }

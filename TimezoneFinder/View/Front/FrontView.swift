@@ -22,7 +22,7 @@ struct FrontView: View {
             }
             
         }
-        .frame(minHeight: 416, maxHeight: .infinity)
+        .frame(minHeight: 416, maxHeight: 416)
     }
 }
 
