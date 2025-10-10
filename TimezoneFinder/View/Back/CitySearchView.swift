@@ -298,9 +298,9 @@ struct BackBodyView: View {
                     .font(.system(size: 12, design: .rounded))
                     .contentShape(Rectangle())
             }
-            .padding(EdgeInsets(top: 0, leading: -4, bottom: 0, trailing: -2))
-            .padding(.horizontal, 8)
-            .padding(.bottom, 4)
+            .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 1))
+//            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
             
             // City list with drag and drop functionality
             if !viewModel.cityOrder.isEmpty {
