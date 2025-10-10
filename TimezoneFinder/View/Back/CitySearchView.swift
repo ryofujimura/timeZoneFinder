@@ -304,10 +304,8 @@ struct BackBodyView: View {
             
             // City list with drag and drop functionality
             if !viewModel.cityOrder.isEmpty {
-                ZStack {
-                    // Color.black
-                    
-                    List {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
                         ForEach(viewModel.cityOrder, id: \.self) { city in
                             if let cityInfo = viewModel.cityData[city] {
                                 HStack {
@@ -324,18 +322,10 @@ struct BackBodyView: View {
                                             citySearchVM.deleteSelectedCity(city: city)
                                         }
                                 }
-                                .listRowInsets(EdgeInsets(top: 0, leading: -4, bottom: 0, trailing: -4))
-//                                .listRowInsets(.init(top: 0, leading: -8, bottom: 0, trailing: -8))
-//                                .listRowBackground(Color.clear)
-//                                .background(Color.clear)
                             }
                         }
-                        .onMove(perform: viewModel.moveCity)
                     }
-                    
-                    .listStyle(PlainListStyle())
-                    .environment(\.defaultMinListRowHeight, 30)
-                    .scrollContentBackground(.hidden)
+                    .padding(.bottom, 8)
                 }
                 .frame(minHeight: 110, maxHeight: 200)
             }
